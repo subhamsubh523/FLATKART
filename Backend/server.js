@@ -16,7 +16,10 @@ connectDB();
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true
+}));
 
 app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
@@ -31,7 +34,12 @@ app.get("/", (req, res) => {
 });
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, { 
+  cors: { 
+    origin: process.env.FRONTEND_URL || "*",
+    credentials: true
+  } 
+});
 
 // userId -> Set of socketIds (supports multiple tabs)
 const onlineUsers = new Map();
