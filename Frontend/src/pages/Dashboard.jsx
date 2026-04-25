@@ -1281,7 +1281,7 @@ const styles = {
   title: { margin: 0, fontSize: "1.4rem", color: "#2c3e50" },
   addBtn: { padding: "10px 20px", background: "#2c3e50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.95rem" },
   empty: { textAlign: "center", padding: "60px 0", color: "#888", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "20px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" },
   flatCard: { background: "#fff", borderRadius: "10px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", position: "relative" },
   flatImg: { width: "100%", height: "160px", objectFit: "cover" },
   noImg: { height: "160px", background: "#ecf0f1", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" },
