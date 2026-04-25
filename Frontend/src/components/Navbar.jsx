@@ -39,19 +39,19 @@ export default function Navbar() {
 
   return (
     <>
-      <nav style={styles.nav}>
-        <Link to="/" style={styles.brand}>
+      <nav style={styles.nav} className="nav-responsive">
+        <Link to="/" style={styles.brand} className="nav-brand">
           <img src={logo} alt="Flatkart" style={styles.logo} />
-          <span style={styles.brandText}>FLAT<span style={{ color: user?.role === "owner" ? "#f1c40f" : "#1abc9c" }}>KART</span></span>
+          <span style={styles.brandText} className="nav-brand-text">FLAT<span style={{ color: user?.role === "owner" ? "#f1c40f" : "#1abc9c" }}>KART</span></span>
         </Link>
 
-        <div style={styles.links}>
-          <Link to="/" style={linkStyle("/")}>Home</Link>
-          {user?.role !== "owner" && <Link to="/flats" style={linkStyle("/flats")}>Flats</Link>}
-          {user?.role === "owner" && <Link to="/dashboard" style={linkStyle("/dashboard")}>Dashboard</Link>}
-          {user?.role === "tenant" && <Link to="/my-bookings" style={linkStyle("/my-bookings")}>My Bookings</Link>}
+        <div style={styles.links} className="nav-links">
+          <Link to="/" style={linkStyle("/")} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+          {user?.role !== "owner" && <Link to="/flats" style={linkStyle("/flats")} onClick={() => setMobileMenuOpen(false)}>Flats</Link>}
+          {user?.role === "owner" && <Link to="/dashboard" style={linkStyle("/dashboard")} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>}
+          {user?.role === "tenant" && <Link to="/my-bookings" style={linkStyle("/my-bookings")} onClick={() => setMobileMenuOpen(false)}>My Bookings</Link>}
           {user && (
-            <Link to="/chat" style={{ ...linkStyle("/chat"), position: "relative" }}>
+            <Link to="/chat" style={{ ...linkStyle("/chat"), position: "relative" }} onClick={() => setMobileMenuOpen(false)}>
               Chat
               {unreadCount > 0 && (
                 <span style={styles.chatBadge}>{unreadCount > 99 ? "99+" : unreadCount}</span>
@@ -322,21 +322,21 @@ async function getCroppedImg(imageSrc, pixelCrop) {
 }
 
 const styles = {
-  nav: { position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", background: "#1a252f", boxShadow: "0 2px 10px rgba(0,0,0,0.3)", height: "60px", flexWrap: "wrap" },
-  brand: { display: "flex", alignItems: "center", gap: "30px", textDecoration: "none" },
-  logo: { height: "42px", width: "100px", objectFit: "cover", borderRadius: "12px", border: "2px solid #1abc9c", flexShrink: 0, transform: "scale(1.3)", objectPosition:"10% center"},
-  brandText: { fontSize: "1.35rem", fontWeight: "800", color: "#fff", letterSpacing: "4px", fontFamily: "'Segoe UI', sans-serif" },
+  nav: { position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px", background: "#1a252f", boxShadow: "0 2px 10px rgba(0,0,0,0.3)", minHeight: "60px", flexWrap: "wrap", gap: "16px", rowGap: "12px" },
+  brand: { display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 },
+  logo: { height: "38px", width: "90px", objectFit: "cover", borderRadius: "12px", border: "2px solid #1abc9c", flexShrink: 0, transform: "scale(1.2)", objectPosition:"10% center"},
+  brandText: { fontSize: "1.2rem", fontWeight: "800", color: "#fff", letterSpacing: "3px", fontFamily: "'Segoe UI', sans-serif", whiteSpace: "nowrap" },
   brandAccent: { color: "#1abc9c" },
-  links: { display: "flex", gap: "4px", alignItems: "center" },
-  link: { color: "#bdc3c7", textDecoration: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "0.95rem" },
+  links: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" },
+  link: { color: "#bdc3c7", textDecoration: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.9rem", whiteSpace: "nowrap" },
   activeLink: { color: "#1abc9c", background: "rgba(26,188,156,0.1)", borderBottom: "2px solid #1abc9c", borderRadius: "6px 6px 0 0" },
   chatBadge: { position: "absolute", top: "-4px", right: "-4px", background: "#e74c3c", color: "#fff", borderRadius: "10px", padding: "1px 5px", fontSize: "0.65rem", fontWeight: "700", lineHeight: "1.4", minWidth: "16px", textAlign: "center" },
-  right: { display: "flex", alignItems: "center", gap: "12px" },
-  profileArea: { position: "relative", display: "flex", alignItems: "center", gap: "10px" },
-  greeting: { color: "#1abc9c", fontWeight: "700", fontSize: "0.9rem", letterSpacing: "0.5px" },
-  avatarBtn: { display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: "8px" },
-  avatarImg: { width: "34px", height: "34px", borderRadius: "50%", objectFit: "cover", border: "2px solid #1abc9c" },
-  avatarInitial: { width: "34px", height: "34px", borderRadius: "50%", background: "#1abc9c", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "0.95rem", color: "#fff" },
+  right: { display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 },
+  profileArea: { position: "relative", display: "flex", alignItems: "center", gap: "8px" },
+  greeting: { color: "#1abc9c", fontWeight: "700", fontSize: "0.85rem", letterSpacing: "0.5px", whiteSpace: "nowrap" },
+  avatarBtn: { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", padding: "4px 6px", borderRadius: "8px" },
+  avatarImg: { width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", border: "2px solid #1abc9c" },
+  avatarInitial: { width: "32px", height: "32px", borderRadius: "50%", background: "#1abc9c", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "0.9rem", color: "#fff" },
   userName: { color: "#ecf0f1", fontSize: "0.9rem" },
   chevron: { color: "#bdc3c7", fontSize: "0.7rem" },
   dropdown: { position: "absolute", right: 0, top: "48px", background: "#fff", borderRadius: "10px", boxShadow: "0 8px 24px rgba(0,0,0,0.15)", minWidth: "240px", zIndex: 200, overflow: "hidden" },
@@ -347,9 +347,13 @@ const styles = {
   dropRole: { background: "#eaf4fb", color: "#2980b9", padding: "2px 8px", borderRadius: "10px", fontSize: "0.75rem", fontWeight: "600" },
   divider: { margin: 0, border: "none", borderTop: "1px solid #f0f0f0" },
   dropItem: { display: "block", width: "100%", padding: "11px 16px", background: "none", border: "none", textAlign: "left", cursor: "pointer", fontSize: "0.9rem", color: "#333" },
-  authLinks: { display: "flex", gap: "8px", alignItems: "center" },
-  loginBtn: { color: "#ecf0f1", textDecoration: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "0.9rem", border: "1px solid rgba(255,255,255,0.2)" },
-  registerBtn: { color: "#fff", textDecoration: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "0.9rem", background: "#1abc9c" },
+  authLinks: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" },
+  loginBtn: { color: "#ecf0f1", textDecoration: "none", padding: "5px 14px", borderRadius: "6px", fontSize: "0.85rem", border: "2px solid rgba(255,255,255,0.5)", whiteSpace: "nowrap", display: "inline-block", boxSizing: "border-box", lineHeight: "1.2" },
+  registerBtn: { color: "#fff", textDecoration: "none", padding: "5px 14px", borderRadius: "6px", fontSize: "0.85rem", background: "#1abc9c", whiteSpace: "nowrap", display: "inline-block", border: "2px solid #1abc9c", boxSizing: "border-box", lineHeight: "1.2" },
+  hamburger: { display: "none" },
+  mobileMenu: { display: "none" },
+  mobileLink: { display: "none" },
+  mobileLink2: { display: "none" },
   hamburger: { display: "none" },
   mobileMenu: { display: "none" },
   mobileLink: { display: "none" },

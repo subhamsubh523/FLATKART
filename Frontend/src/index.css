@@ -124,3 +124,205 @@ a[style*="background"]:active {
   transform: translateY(0px) scale(0.98);
   filter: brightness(0.96);
 }
+
+/* ========================================
+   RESPONSIVE STYLES FOR ALL DEVICES
+   ======================================== */
+
+/* Tablet Styles (768px - 1024px) */
+@media (max-width: 1024px) {
+  nav {
+    padding: 0 16px !important;
+  }
+}
+
+/* Medium screens - Adjust font sizes */
+@media (max-width: 900px) {
+  nav > a > span {
+    font-size: 1.1rem !important;
+    letter-spacing: 2px !important;
+  }
+  
+  nav > div:last-child > div > span:first-child {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Mobile Styles (max-width: 768px) */
+@media (max-width: 768px) {
+  nav img {
+    height: 32px !important;
+    width: 80px !important;
+  }
+  
+  nav > a > span {
+    font-size: 1rem !important;
+    letter-spacing: 2px !important;
+  }
+  
+  /* Dashboard layout */
+  body > div > div > div > aside {
+    width: 100% !important;
+    position: relative !important;
+  }
+  
+  body > div > div > div > main {
+    padding: 16px !important;
+  }
+  
+  /* Chat layout */
+  .chat-page,
+  body > div > div > div[style*="display: flex"][style*="height"] {
+    flex-direction: column !important;
+  }
+  
+  body > div > div > div[style*="display: flex"] > div:first-child[style*="width: 300px"] {
+    width: 100% !important;
+    max-height: 40vh !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+  }
+  
+  /* Forms */
+  div[style*="display: flex"][style*="gap"] > div[style*="flex: 1"] {
+    width: 100% !important;
+  }
+  
+  /* Modals */
+  div[style*="position: fixed"][style*="inset: 0"] > div {
+    width: 95% !important;
+    max-width: 95% !important;
+    padding: 20px !important;
+    margin: 10px !important;
+  }
+  
+  /* Hero sections */
+  div[style*="height: 460px"] {
+    height: 300px !important;
+  }
+  
+  div[style*="height: 460px"] h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  div[style*="height: 460px"] p[style*="font-size: 1.8rem"] {
+    font-size: 1.3rem !important;
+  }
+  
+  /* Grid layouts */
+  div[style*="grid-template-columns"][style*="repeat"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Buttons */
+  div[style*="display: flex"][style*="gap"] button,
+  div[style*="display: flex"][style*="gap"] a[style*="padding"] {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  
+  /* Booking cards */
+  div[style*="display: flex"][style*="overflow: hidden"] {
+    flex-direction: column !important;
+  }
+  
+  div[style*="display: flex"][style*="overflow: hidden"] > div:first-child {
+    width: 100% !important;
+    height: 180px !important;
+  }
+  
+  /* Tables */
+  table {
+    font-size: 0.85rem !important;
+  }
+  
+  th, td {
+    padding: 8px !important;
+  }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  body {
+    font-size: 14px !important;
+  }
+  
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.3rem !important;
+  }
+  
+  h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  nav img {
+    height: 28px !important;
+    width: 70px !important;
+  }
+  
+  nav > a > span {
+    font-size: 0.9rem !important;
+  }
+  
+  div[style*="height: 460px"],
+  div[style*="height: 300px"] {
+    height: 250px !important;
+  }
+  
+  div[style*="position: fixed"][style*="inset: 0"] > div {
+    padding: 16px !important;
+  }
+  
+  div[style*="padding: 32px"],
+  div[style*="padding: 28px"] {
+    padding: 16px !important;
+  }
+  
+  div[style*="maxWidth: 1140px"],
+  div[style*="maxWidth: 1100px"] {
+    padding: 12px !important;
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  div[style*="position: fixed"][style*="inset: 0"] > div {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  div[style*="maxWidth: 1140px"],
+  div[style*="maxWidth: 1100px"] {
+    max-width: 1400px !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a {
+    min-height: 44px !important;
+  }
+  
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  nav,
+  aside,
+  button {
+    display: none !important;
+  }
+}
