@@ -296,7 +296,19 @@ export default function FlatDetail() {
                 📍 Get Directions
               </a>
               {user?.role === "tenant" && hasBooked && flat.owner_id && (
-                <button style={styles.chatBtn} onClick={() => navigate(`/chat/${flat.owner_id}`, { state: { name: flat.ownerName } })}>
+                <button style={styles.chatBtn} onClick={async () => {
+                  try {
+                    const { data: ownerData } = await API.get(`/chat/user/${flat.owner_id}`);
+                    navigate(`/chat/${flat.owner_id}`, { 
+                      state: { 
+                        name: ownerData.name || flat.ownerName,
+                        avatar: ownerData.avatar || null
+                      } 
+                    });
+                  } catch {
+                    navigate(`/chat/${flat.owner_id}`, { state: { name: flat.ownerName } });
+                  }
+                }}>
                   💬 Chat with Owner
                 </button>
               )}

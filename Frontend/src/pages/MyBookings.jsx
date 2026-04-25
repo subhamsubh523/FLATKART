@@ -68,7 +68,7 @@ function ReviewSection({ flatId }) {
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [ownerNames, setOwnerNames] = useState({});
+  const [ownerData, setOwnerData] = useState({});
   const [cancelling, setCancelling] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const navigate = useNavigate();
@@ -91,12 +91,12 @@ export default function MyBookings() {
       const valid = data.filter((b) => b.flat_id && b.flat_id.location);
       setBookings(valid);
       setLoading(false);
-      // Fetch owner names for all unique owner_ids
+      // Fetch owner data (name and avatar) for all unique owner_ids
       const uniqueOwnerIds = [...new Set(valid.map((b) => b.flat_id?.owner_id).filter(Boolean))];
       uniqueOwnerIds.forEach((ownerId) => {
-        if (ownerNames[ownerId]) return;
+        if (ownerData[ownerId]) return;
         API.get(`/chat/user/${ownerId}`)
-          .then(({ data: u }) => setOwnerNames((prev) => ({ ...prev, [ownerId]: u.name })))
+          .then(({ data: u }) => setOwnerData((prev) => ({ ...prev, [ownerId]: { name: u.name, avatar: u.avatar } })))
           .catch(() => {});
       });
     });
@@ -187,8 +187,16 @@ export default function MyBookings() {
                   {b.flat_id?.owner_id && (
                     <button
                       style={styles.chatBtn}
-                      onClick={() => navigate(`/chat/${b.flat_id.owner_id}`, { state: { name: ownerNames[b.flat_id.owner_id] || "Owner" } })}>
-                      💬 Chat with {ownerNames[b.flat_id.owner_id] || "Owner"}
+                      onClick={() => {
+                        const owner = ownerData[b.flat_id.owner_id];
+                        navigate(`/chat/${b.flat_id.owner_id}`, { 
+                          state: { 
+                            name: owner?.name || "Owner",
+                            avatar: owner?.avatar || null
+                          } 
+                        });
+                      }}>
+                      💬 Chat with {ownerData[b.flat_id.owner_id]?.name || "Owner"}
                     </button>
                   )}
 

@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { io } from "socket.io-client";
+import { getSocket } from "../context/AuthContext";
 import API from "../api";
 import { useAuth } from "../context/AuthContext";
 import Spinner from "../components/Spinner";
 import EmojiPicker from "emoji-picker-react";
 import { FiPaperclip, FiX, FiImage, FiSmile, FiPhone, FiMail } from "react-icons/fi";
 
-const socket = io("http://localhost:5000", { autoConnect: true });
 const avatarSrc = (avatar) => {
   if (!avatar) return null;
   if (avatar.startsWith("http")) return avatar;
@@ -59,6 +58,7 @@ export default function Chat() {
 
   const nameCache = useRef({});
   const avatarCache = useRef({});
+  const socket = getSocket();
 
   useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
 
@@ -79,11 +79,9 @@ export default function Chat() {
 
   useEffect(() => {
     if (!user?.id) return;
-    const userIdStr = user.id.toString();
-    socket.emit("join", userIdStr);
+    // Request current online users list
     socket.emit("get_online_users");
-    console.log("Joined chat with userId:", userIdStr);
-  }, [user]);
+  }, [user, socket]);
 
   useEffect(() => {
     const onOnline = (uid) => {
@@ -106,7 +104,7 @@ export default function Chat() {
       socket.off("user_offline", onOffline);
       socket.off("online_users", onOnlineList);
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     const onMessage = (msg) => {
@@ -132,7 +130,7 @@ export default function Chat() {
       socket.off("receive_message", onMessage);
       socket.off("new_conversation", onNewConv);
     };
-  }, [fetchConversations]);
+  }, [fetchConversations, socket]);
 
   useEffect(() => {
     fetchConversations();
@@ -183,10 +181,12 @@ export default function Chat() {
         setActiveEmail(conv.email || "");
       } else {
         const stateNameForThisId = location.state?.name && userId === activeId ? location.state.name : null;
+        const stateAvatarForThisId = location.state?.avatar && userId === activeId ? location.state.avatar : null;
         if (stateNameForThisId) {
           nameCache.current[activeId] = stateNameForThisId;
+          if (stateAvatarForThisId) avatarCache.current[activeId] = stateAvatarForThisId;
           setActiveName(stateNameForThisId);
-          setActiveAvatar(location.state?.avatar || "");
+          setActiveAvatar(stateAvatarForThisId || "");
         } else {
           setActiveName("");
           setActiveAvatar("");

@@ -1,7 +1,18 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import API from "../api";
 
 const AuthContext = createContext();
+
+// Global socket instance
+let socket = null;
+
+export function getSocket() {
+  if (!socket) {
+    socket = io("http://localhost:5000", { autoConnect: false });
+  }
+  return socket;
+}
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -16,6 +27,31 @@ export function AuthProvider({ children }) {
       setUser(fresh);
     }).catch(() => {});
   }, [token]);
+
+  // Handle socket connection based on authentication status
+  useEffect(() => {
+    const socket = getSocket();
+
+    if (user?.id) {
+      // User is logged in - connect socket and emit join
+      if (!socket.connected) {
+        socket.connect();
+      }
+      socket.emit("join", user.id.toString());
+      console.log("User logged in, socket connected:", user.id);
+    } else {
+      // User is logged out - disconnect socket
+      if (socket.connected) {
+        socket.disconnect();
+        console.log("User logged out, socket disconnected");
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      // Don't disconnect on unmount, only on logout
+    };
+  }, [user]);
 
   const login = (token, user) => {
     localStorage.setItem("token", token);

@@ -45,7 +45,6 @@ io.on("connection", (socket) => {
     onlineUsers.get(userIdStr).add(socket.id);
     // Broadcast to everyone that this user is online
     io.emit("user_online", userIdStr);
-    console.log(`User ${userIdStr} joined. Online users:`, [...onlineUsers.keys()]);
   });
 
   socket.on("send_message", ({ receiver_id, message }) => {
@@ -69,7 +68,6 @@ io.on("connection", (socket) => {
         onlineUsers.delete(userId);
         // Broadcast to everyone that this user is offline
         io.emit("user_offline", userId);
-        console.log(`User ${userId} disconnected. Online users:`, [...onlineUsers.keys()]);
       }
     }
   });
