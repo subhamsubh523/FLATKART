@@ -27,8 +27,11 @@ const findById = async (id) => {
 export const sendRegisterOTP = async (req, res) => {
   const { email, role, phone } = req.body;
   if (!email) return res.status(400).json({ message: "Email is required" });
-  const existing = await findByEmail(email);
-  if (existing) return res.status(400).json({ message: "Email already registered" });
+  const [existingUser, existingOwner] = await Promise.all([
+    User.findOne({ email }).lean(),
+    Owner.findOne({ email }).lean(),
+  ]);
+  if (existingUser || existingOwner) return res.status(400).json({ message: "Email already registered" });
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiry = Date.now() + 10 * 60 * 1000;

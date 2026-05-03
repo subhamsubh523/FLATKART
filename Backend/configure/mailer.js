@@ -1,19 +1,19 @@
 import nodemailer from "nodemailer";
 
-const getTransporter = () =>
-  nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: { rejectUnauthorized: false },
-  });
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: { rejectUnauthorized: false },
+  pool: true,
+  maxConnections: 3,
+});
 
 export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "📧 Email Verification", bodyText = "Use the OTP below to verify your email:") => {
-  const transporter = getTransporter();
   await transporter.sendMail({
     from: `"Flatkart Support" <${process.env.EMAIL_USER}>`,
     to,
