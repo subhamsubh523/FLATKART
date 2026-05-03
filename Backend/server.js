@@ -96,4 +96,11 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`http://localhost:${PORT}`));
+server.listen(PORT, () => {
+  console.log(`http://localhost:${PORT}`);
+  if (process.env.RENDER_EXTERNAL_URL) {
+    setInterval(() => {
+      fetch(`${process.env.RENDER_EXTERNAL_URL}/`).catch(() => {});
+    }, 14 * 60 * 1000);
+  }
+});
