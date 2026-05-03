@@ -9,7 +9,7 @@ const getTransporter = () =>
     },
   });
 
-export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "🔒 Email Verification", bodyText = "Use the OTP below to verify your email:") => {
+export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "📧 Email Verification", bodyText = "Use the OTP below to verify your email:") => {
   const transporter = getTransporter();
   await transporter.sendMail({
     from: `"Flatkart Support" <${process.env.EMAIL_USER}>`,
