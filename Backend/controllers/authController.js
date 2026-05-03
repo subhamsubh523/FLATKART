@@ -35,7 +35,7 @@ export const sendRegisterOTP = async (req, res) => {
   await PendingOTP.findOneAndUpdate(
     { email },
     { $set: { email, otp, expiry, role, phone } },
-    { upsert: true, returnDocument: "after" }
+    { upsert: true, returnDocument: 'after' }
   );
   try {
     await sendOTPEmail(email, otp, "Verify your Flatkart account", "📧 Email Verification", "Use the OTP below to verify your email and complete registration:");

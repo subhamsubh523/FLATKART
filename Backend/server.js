@@ -16,8 +16,17 @@ connectDB();
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:3000",
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }));
 
@@ -36,7 +45,7 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, { 
   cors: { 
-    origin: process.env.FRONTEND_URL || "*",
+    origin: allowedOrigins,
     credentials: true
   } 
 });
