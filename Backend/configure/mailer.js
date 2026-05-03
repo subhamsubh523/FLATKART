@@ -1,10 +1,20 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BREVO_SMTP_LOGIN,
+    pass: process.env.BREVO_SMTP_PASSWORD,
+  },
+  pool: true,
+  maxConnections: 3,
+});
 
 export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "📧 Email Verification", bodyText = "Use the OTP below to verify your email:") => {
-  await resend.emails.send({
-    from: "Flatkart Support <onboarding@resend.dev>",
+  await transporter.sendMail({
+    from: `"Flatkart Support" <flatkart.support@gmail.com>`,
     to,
     subject,
     html: `
@@ -15,7 +25,7 @@ export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", hea
           ${otp}
         </div>
         <p style="color:#888;font-size:0.9rem">This OTP is valid for <b>10 minutes</b>. Do not share it with anyone.</p>
-        <p style="color:#888;font-size:0.9rem">If you did not request this, please contact our support team.</p>
+        <p style="color:#888;font-size:0.9rem">If you did not request this, please contact our support team at flatkart.support@gmail.com.</p>
       </div>
     `,
   });
