@@ -1,18 +1,10 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  pool: true,
-  maxConnections: 3,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "📧 Email Verification", bodyText = "Use the OTP below to verify your email:") => {
-  await transporter.sendMail({
-    from: `"Flatkart Support" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "Flatkart Support <onboarding@resend.dev>",
     to,
     subject,
     html: `
@@ -23,7 +15,7 @@ export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", hea
           ${otp}
         </div>
         <p style="color:#888;font-size:0.9rem">This OTP is valid for <b>10 minutes</b>. Do not share it with anyone.</p>
-        <p style="color:#888;font-size:0.9rem">If you did not request this, please contact our support team at ${process.env.EMAIL_USER}.</p>
+        <p style="color:#888;font-size:0.9rem">If you did not request this, please contact our support team.</p>
       </div>
     `,
   });

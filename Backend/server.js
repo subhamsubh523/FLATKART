@@ -42,15 +42,6 @@ app.get("/", (req, res) => {
   res.send("Server Running");
 });
 
-app.get("/debug-env", (req, res) => {
-  res.json({
-    EMAIL_USER: process.env.EMAIL_USER || "NOT SET",
-    EMAIL_PASS_LENGTH: process.env.EMAIL_PASS?.length || "NOT SET",
-    MONGO_URL_SET: !!process.env.MONGO_URL,
-    JWT_SECRET_SET: !!process.env.JWT_SECRET,
-  });
-});
-
 const server = http.createServer(app);
 const io = new Server(server, { 
   cors: { 
