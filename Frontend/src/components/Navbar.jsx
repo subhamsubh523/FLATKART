@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../api";
 import toast from "react-hot-toast";
-import logo from "../assets/logo3.jpg";
+import logo from "../assets/logo.png";
 import Cropper from "react-easy-crop";
 import { FiHome, FiGrid, FiBookmark, FiMessageSquare, FiSettings, FiLogOut, FiChevronDown, FiChevronUp, FiX } from "react-icons/fi";
 
@@ -345,7 +345,7 @@ async function getCroppedImg(imageSrc, pixelCrop) {
 const styles = {
   nav: { position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px", background: "#1a252f", boxShadow: "0 2px 10px rgba(0,0,0,0.3)", minHeight: "60px", flexWrap: "wrap", gap: "16px", rowGap: "12px" },
   brand: { display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 },
-  logo: { height: "38px", width: "90px", objectFit: "cover", borderRadius: "12px", border: "2px solid #1abc9c", flexShrink: 0, transform: "scale(1.2)", objectPosition:"10% center"},
+  logo: { height: "48px", width: "48px", objectFit: "fill", borderRadius: "50%", border: "2px solid #1abc9c", flexShrink: 0, display: "block" },
   brandText: { fontSize: "1.2rem", fontWeight: "800", color: "#fff", letterSpacing: "3px", fontFamily: "'Segoe UI', sans-serif", whiteSpace: "nowrap" },
   brandAccent: { color: "#1abc9c" },
   hamburger: { display: "none", background: "none", border: "none", color: "#fff", cursor: "pointer", padding: "8px", lineHeight: "1", transition: "all 0.3s ease" },
