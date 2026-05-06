@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   const url = `http://localhost:${PORT}`;
-  console.log(`\x1b]8;;${url}\x1b\\LOCALHOST URL\x1b]8;;\x1b\\`);
+  console.log(`BACKEND URL: ${url}`);
   if (process.env.RENDER_EXTERNAL_URL) {
     setInterval(() => {
       fetch(`${process.env.RENDER_EXTERNAL_URL}/`).catch(() => {});
