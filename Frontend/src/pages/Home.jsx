@@ -25,9 +25,9 @@ function useScrollReveal(ref) {
 const tenantFeatures = [
   { icon: <FiSearch size={24} />, title: "Smart Search", desc: "Filter flats by location, price, and type to find exactly what you need." },
   { icon: <FiCalendar size={24} />, title: "Easy Booking", desc: "Book a flat in seconds. Owners get notified and can approve or reject instantly." },
-  { icon: <FiMessageSquare size={24} />, title: "Live Chat", desc: "Chat in real-time with owners using our built-in Socket.io chat." },
+  { icon: <FiMessageSquare size={24} />, title: "Live Chat", desc: "Chat in real-time with owners using our built-in Chat System." },
   { icon: <FiStar size={24} />, title: "Reviews", desc: "Read honest reviews from verified tenants before making a decision." },
-  { icon: <FiLock size={24} />, title: "Secure Auth", desc: "JWT-based authentication with OTP email verification for password reset." },
+  { icon: <FiLock size={24} />, title: "Secure Auth", desc: "OTP-based authentication for email verification for password reset." },
   { icon: <FiImage size={24} />, title: "Rich Profiles", desc: "Upload profile pictures, edit your name, and manage your account easily." },
 ];
 
@@ -120,7 +120,7 @@ function OwnerHome({ user, stats }) {
 
       {/* How it works for owners */}
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle} className="scroll-reveal"><FiZap size={20} style={{ marginRight: 8, verticalAlign: "middle" }} />How It Works for Owners</h2>
+        <h2 style={styles.sectionTitle} className="scroll-reveal"><FiZap size={20} style={{ marginRight: 8, verticalAlign: "middle" }} />How It Works?</h2>
         <div style={styles.stepsRow}>
           {ownerSteps.map((s, i) => (
             <div key={i} style={ownerStyles.stepCard} className={i % 2 === 0 ? "scroll-reveal-left" : "scroll-reveal-right"}>
@@ -156,7 +156,7 @@ function TenantHome({ user, stats }) {
           <p style={styles.heroSub}>Browse hundreds of verified flats. Book instantly. Chat with owners directly.</p>
           <div style={styles.heroBtns}>
             <Link to="/flats" style={styles.heroPrimary}>Browse Flats</Link>
-            {!user && <Link to="/register" style={styles.heroSecondary}>Get Started Free</Link>}
+            {!user && <Link to="/register" style={styles.heroSecondary}>Get Started</Link>}
           </div>
         </div>
       </section>
@@ -194,7 +194,7 @@ function TenantHome({ user, stats }) {
 
       {/* How it works */}
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle} className="scroll-reveal"><FiZap size={20} style={{ marginRight: 8, verticalAlign: "middle" }} />How It Works</h2>
+        <h2 style={styles.sectionTitle} className="scroll-reveal"><FiZap size={20} style={{ marginRight: 8, verticalAlign: "middle" }} />How It Works?</h2>
         <div style={styles.stepsRow}>
           {tenantSteps.map((s, i) => (
             <div key={i} style={styles.stepCard} className={i % 2 === 0 ? "scroll-reveal-left" : "scroll-reveal-right"}>
