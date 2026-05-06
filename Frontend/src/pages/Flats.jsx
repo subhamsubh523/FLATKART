@@ -69,7 +69,7 @@ export default function Flats() {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState("");
 
-  const openLightbox = (images, idx) => { setLightbox({ images, idx }); setLbZoom(1); };
+  const openLightbox = (images, idx, labels) => { setLightbox({ images, idx, labels }); setLbZoom(1); };
   const closeLightbox = () => { setLightbox(null); setLbZoom(1); };
 
   useEffect(() => {
@@ -220,7 +220,7 @@ export default function Flats() {
         <p style={styles.searchSub}>Select or type your State, District and City to discover available flats</p>
 
         <button onClick={useMyLocation} disabled={geoLoading} style={styles.geoBtn}>
-          {geoLoading ? <><span style={styles.geoBtnSpinner} />Detecting location...</> : <><FiMapPin size={14} style={{ marginRight: 6 }} />Current Location</>}
+          {geoLoading ? <><span style={styles.geoBtnSpinner} />Detecting Your Location...</> : <><FiMapPin size={14} style={{ marginRight: -3 }} />Current Location</>}
         </button>
         {geoError && <p style={styles.geoError}>{geoError}</p>}
 
@@ -299,10 +299,12 @@ export default function Flats() {
         <div style={styles.grid}>
           {filtered.map((flat) => (
             <div key={flat._id} style={styles.card}>
-              <ImageSlider images={flat.images} image={flat.image} height="190px" onImageClick={openLightbox} />
+              <div style={{ position: "relative" }}>
+                <ImageSlider images={flat.images} image={flat.image} height="190px" onImageClick={openLightbox} imageLabels={flat.imageLabels} />
+                <span style={styles.heroTypeBadge}>{flat.type}</span>
+              </div>
               <div style={styles.cardBody}>
                 <div style={styles.cardTop}>
-                  <span style={styles.typeBadge}>{flat.type}</span>
                   <RatingBadge flatId={flat._id} />
                 </div>
                 <h3 style={styles.cardTitle}>
@@ -336,12 +338,17 @@ export default function Flats() {
             <button onClick={(e) => { e.stopPropagation(); setLbZoom((z) => Math.min(4, +(z + 0.25).toFixed(2))); }} style={styles.lbZoomBtn} title="Zoom in">+</button>
             {lbZoom > 1 && <button onClick={(e) => { e.stopPropagation(); setLbZoom(1); }} style={{ ...styles.lbZoomBtn, fontSize: "0.7rem", padding: "0 10px", width: "auto" }}>Reset</button>}
           </div>
-          <img
-            src={lightbox.images[lightbox.idx]}
-            alt="full"
-            style={{ ...styles.lightboxImg, transform: `scale(${lbZoom})`, transition: "transform 0.2s ease" }}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div style={{ position: "relative", display: "inline-flex" }} onClick={(e) => e.stopPropagation()}>
+            <img
+              src={lightbox.images[lightbox.idx]}
+              alt="full"
+              style={{ ...styles.lightboxImg, transform: `scale(${lbZoom})`, transition: "transform 0.2s ease" }}
+              onClick={(e) => e.stopPropagation()}
+            />
+            {lightbox.labels?.[lightbox.idx] && (
+              <div style={styles.lbLabel}>{lightbox.labels[lightbox.idx]}</div>
+            )}
+          </div>
           {lightbox.images.length > 1 && (
             <>
               <button onClick={(e) => { e.stopPropagation(); setLightbox((lb) => ({ ...lb, idx: (lb.idx - 1 + lb.images.length) % lb.images.length })); setLbZoom(1); }} style={{ ...styles.lbArrow, left: "16px" }}><FiChevronLeft size={22} /></button>
@@ -381,6 +388,7 @@ const styles = {
   cardBody: { padding: "16px" },
   cardTop: { marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" },
   typeBadge: { background: "#eaf4fb", color: "#2980b9", padding: "3px 10px", borderRadius: "10px", fontSize: "0.78rem", fontWeight: "600" },
+  heroTypeBadge: { position: "absolute", top: "8px", left: "8px", background: "linear-gradient(135deg,#1abc9c,#16a085)", color: "#fff", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.3px", zIndex: 2 },
   cardTitle: { margin: "0 0 6px", fontSize: "1.05rem", color: "#2c3e50" },
   cardDesc: { margin: "0 0 8px", fontSize: "0.88rem", color: "#777", lineHeight: "1.5" },
   cardMeta: { margin: "0 0 10px", fontSize: "0.82rem", color: "#888" },
@@ -398,4 +406,5 @@ const styles = {
   lbDots: { position: "fixed", bottom: "22px", left: "50%", transform: "translateX(-50%)", display: "flex", gap: "8px", zIndex: 10000 },
   lbDot: { width: "8px", height: "8px", borderRadius: "50%", cursor: "pointer", transition: "background 0.2s" },
   lbZoomBtn: { background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", fontSize: "1.2rem", width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000, fontWeight: "700" },
+  lbLabel: { position: "absolute", bottom: "12px", left: "16px", background: "linear-gradient(135deg,#1abc9c,#16a085)", color: "#fff", padding: "6px 20px", borderRadius: "20px", fontSize: "0.88rem", fontWeight: "700", letterSpacing: "0.4px", pointerEvents: "none" },
 };
