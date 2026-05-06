@@ -74,7 +74,7 @@ export default function AdminProfile({ admin, onUpdate }) {
             <div style={s.group}>
               <label style={s.label}>Current Password</label>
               <div style={s.pwdWrap}>
-                <input style={s.input} type={showCur ? "text" : "password"} placeholder="Enter current password"
+                <input style={s.input} type={showCur ? "text" : "password"} placeholder="Current Password"
                   value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} />
                 <button type="button" style={s.eye} onClick={() => setShowCur(!showCur)}>{showCur ? <FiEyeOff /> : <FiEye />}</button>
               </div>
@@ -83,7 +83,7 @@ export default function AdminProfile({ admin, onUpdate }) {
               <div style={s.group}>
                 <label style={s.label}>New Password</label>
                 <div style={s.pwdWrap}>
-                  <input style={s.input} type={showNew ? "text" : "password"} placeholder="Enter new password"
+                  <input style={s.input} type={showNew ? "text" : "password"} placeholder="New Password"
                     value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} />
                   <button type="button" style={s.eye} onClick={() => setShowNew(!showNew)}>{showNew ? <FiEyeOff /> : <FiEye />}</button>
                 </div>
@@ -93,7 +93,7 @@ export default function AdminProfile({ admin, onUpdate }) {
                 <div style={s.pwdWrap}>
                   <input
                     style={{ ...s.input, borderColor: form.confirmPassword && form.newPassword !== form.confirmPassword ? "#e74c3c" : "#e0e0e0" }}
-                    type={showCon ? "text" : "password"} placeholder="Confirm new password"
+                    type={showCon ? "text" : "password"} placeholder="Confirm Password"
                     value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} />
                   <button type="button" style={s.eye} onClick={() => setShowCon(!showCon)}>{showCon ? <FiEyeOff /> : <FiEye />}</button>
                 </div>

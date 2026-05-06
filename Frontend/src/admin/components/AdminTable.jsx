@@ -1,7 +1,22 @@
 import { FiBookmark } from "react-icons/fi";
+import { useEffect } from "react";
 
 export default function AdminTable({ columns, data, loading, emptyMsg = "No data found.", emptyIcon }) {
-  if (loading) return <div style={s.loading}>Loading...</div>;
+  useEffect(() => {
+    if (!document.getElementById("spinner-keyframes")) {
+      const style = document.createElement("style");
+      style.id = "spinner-keyframes";
+      style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  if (loading) return (
+    <div style={s.loading}>
+      <div style={s.spinner} />
+      <span>Loading...</span>
+    </div>
+  );
   if (!data.length) return (
     <div style={s.empty}>
       {emptyIcon || <FiBookmark size={56} color="#bdc3c7" style={{ marginBottom: 10 }} />}
@@ -39,7 +54,8 @@ const s = {
   thead: { background: "#2c3e50" },
   th: { padding: "12px 16px", color: "#fff", textAlign: "left", fontSize: "0.82rem", fontWeight: "600", whiteSpace: "nowrap" },
   tr: { borderBottom: "1px solid #f0f0f0" },
-  td: { padding: "12px 16px", fontSize: "0.88rem", color: "#444", verticalAlign: "middle" },
-  loading: { padding: "40px", textAlign: "center", color: "#888" },
+  td: { padding: "12px 16px", fontSize: "0.88rem", color: "#444", verticalAlign: "middle", fontWeight: "600" },
+  loading: { padding: "40px", textAlign: "center", color: "#888", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" },
+  spinner: { width: "36px", height: "36px", border: "3px solid #e0e0e0", borderTop: "3px solid #2c3e50", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
   empty: { padding: "40px", textAlign: "center", color: "#aaa", fontSize: "0.95rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" },
 };

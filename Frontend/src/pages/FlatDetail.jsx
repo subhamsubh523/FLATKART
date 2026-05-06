@@ -23,7 +23,7 @@ export default function FlatDetail() {
   const [lbZoom, setLbZoom] = useState(1);
   const [heroIdx, setHeroIdx] = useState(0);
 
-  const openLightbox = (images, idx) => { setLightbox({ images, idx }); setLbZoom(1); };
+  const openLightbox = (images, idx, labels = []) => { setLightbox({ images, idx, labels }); setLbZoom(1); };
   const closeLightbox = () => { setLightbox(null); setLbZoom(1); };
 
   useEffect(() => {
@@ -148,13 +148,13 @@ export default function FlatDetail() {
               src={allImageUrls[heroIdx]}
               alt="flat"
               style={styles.heroImg}
-              onClick={() => openLightbox(allImageUrls, heroIdx)}
+              onClick={() => openLightbox(allImageUrls, heroIdx, labels)}
             />
           ) : (
             <div style={styles.heroNoImg}><FiHome size={80} color="#bdc3c7" /></div>
           )}
           {labels?.[heroIdx] && (
-            <span style={{ position: "absolute", bottom: "12px", left: "16px", background: "linear-gradient(135deg, #1abc9c, #16a085)", color: "#fff", fontSize: "0.88rem", fontWeight: "700", padding: "6px 18px", borderRadius: "20px", pointerEvents: "none", zIndex: 3, letterSpacing: "0.4px", boxShadow: "0 4px 12px rgba(26,188,156,0.5)" }}>
+            <span style={{ position: "absolute", bottom: "12px", left: "16px", background: "linear-gradient(135deg, #1abc9c, #16a085)", color: "#fff", fontSize: "0.88rem", fontWeight: "700", padding: "6px 18px", borderRadius: "20px", pointerEvents: "none", zIndex: 3, letterSpacing: "0.4px" }}>
               {labels[heroIdx]}
             </span>
           )}
@@ -182,7 +182,7 @@ export default function FlatDetail() {
             {allImageUrls.map((url, i) => (
               <img key={i} src={url} alt={`thumb-${i}`}
                 onClick={() => setHeroIdx(i)}
-                onDoubleClick={() => openLightbox(allImageUrls, i)}
+                onDoubleClick={() => openLightbox(allImageUrls, i, labels)}
                 title="Click to preview · Double-click to zoom"
                 style={{ ...styles.thumb, outline: i === heroIdx ? "3px solid #1abc9c" : "3px solid transparent" }} />
             ))}
@@ -242,6 +242,7 @@ export default function FlatDetail() {
               {flat.state && <AddressItem label="State" value={flat.state} />}
               {flat.pincode && <AddressItem label="Pincode" value={flat.pincode} />}
             </div>
+            {user && (
             <a href={getDirectionsUrl()} target="_blank" rel="noreferrer" style={styles.mapLink}>
               <svg width="16" height="16" viewBox="0 0 24 24" style={{ marginRight: 6, flexShrink: 0 }}>
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
@@ -249,6 +250,7 @@ export default function FlatDetail() {
               </svg>
               Open in Google Maps
             </a>
+            )}
           </div>
 
           {/* Owner Comments */}
@@ -313,9 +315,11 @@ export default function FlatDetail() {
                   {cancelling ? "Cancelling..." : <><FiX size={14} style={{ marginRight: 6, verticalAlign: "middle" }} />Cancel Booking</>}
                 </button>
               )}
+              {user && (
               <a href={getDirectionsUrl()} target="_blank" rel="noreferrer" style={styles.dirBtn}>
                 <FiNavigation size={15} />Get Directions
               </a>
+              )}
               {user?.role === "tenant" && hasBooked && flat.owner_id && (
                 <button style={styles.chatBtn} onClick={async () => {
                   try {
@@ -379,12 +383,18 @@ export default function FlatDetail() {
             <button onClick={(e) => { e.stopPropagation(); setLbZoom((z) => Math.min(4, +(z + 0.25).toFixed(2))); }} style={lbStyles.zoomBtn} title="Zoom in">+</button>
             {lbZoom > 1 && <button onClick={(e) => { e.stopPropagation(); setLbZoom(1); }} style={{ ...lbStyles.zoomBtn, fontSize: "0.7rem", padding: "0 10px", width: "auto" }}>Reset</button>}
           </div>
-          <img
-            src={lightbox.images[lightbox.idx]}
-            alt="flat"
-            style={{ ...lbStyles.img, transform: `scale(${lbZoom})`, transition: "transform 0.2s ease", cursor: "default" }}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div style={{ position: "relative", display: "inline-flex" }} onClick={(e) => e.stopPropagation()}>
+            <img
+              src={lightbox.images[lightbox.idx]}
+              alt="flat"
+              style={{ ...lbStyles.img, transform: `scale(${lbZoom})`, transition: "transform 0.2s ease", cursor: "default" }}
+            />
+            {lightbox.labels?.[lightbox.idx] && (
+              <div style={{ position: "absolute", bottom: "12px", left: "16px", background: "linear-gradient(135deg,#1abc9c,#16a085)", color: "#fff", padding: "6px 20px", borderRadius: "20px", fontSize: "0.88rem", fontWeight: "700", letterSpacing: "0.4px", zIndex: 10000, pointerEvents: "none" }}>
+                {lightbox.labels[lightbox.idx]}
+              </div>
+            )}
+          </div>
           {lightbox.images.length > 1 && (
             <>
               <button onClick={(e) => { e.stopPropagation(); setLightbox((lb) => ({ ...lb, idx: (lb.idx - 1 + lb.images.length) % lb.images.length })); setLbZoom(1); }} style={{ ...lbStyles.arrow, left: "16px" }}><FiChevronLeft size={22} /></button>

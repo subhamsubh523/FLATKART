@@ -322,7 +322,7 @@ export default function Dashboard() {
   const [deleteConfirmFlat, setDeleteConfirmFlat] = useState(null);
   const [lightbox, setLightbox] = useState(null);
   const [lbZoom, setLbZoom] = useState(1);
-  const openLightbox = (images, idx) => { setLightbox({ images, idx }); setLbZoom(1); };
+  const openLightbox = (images, idx, labels = []) => { setLightbox({ images, idx, labels }); setLbZoom(1); };
   const closeLightbox = () => { setLightbox(null); setLbZoom(1); };
 
   useEffect(() => {
@@ -479,7 +479,7 @@ export default function Dashboard() {
                 {flats.map((flat) => (
                   <div key={flat._id} style={{ ...styles.flatCard, ...(flat.visible === false ? styles.hiddenCard : {}) }}>
                     <div style={{ position: "relative" }}>
-                      <ImageSlider images={flat.images} image={flat.image} height="160px" noImgSize="2rem" onImageClick={openLightbox} labels={flat.imageLabels} />
+                      <ImageSlider images={flat.images} image={flat.image} height="160px" noImgSize="2rem" onImageClick={(imgs, idx) => openLightbox(imgs, idx, flat.imageLabels)} labels={flat.imageLabels} />
 
                       {flat.visible === false && <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", pointerEvents: "none" }} />}
                     </div>
@@ -818,7 +818,7 @@ export default function Dashboard() {
                 {flats.filter((f) => f.rented).map((flat) => (
                   <div key={flat._id} style={styles.soldCard}>
                     <div style={styles.soldImgWrap}>
-                      <ImageSlider images={flat.images} image={flat.image} height="160px" noImgSize="2rem" onImageClick={openLightbox} />
+                      <ImageSlider images={flat.images} image={flat.image} height="160px" noImgSize="2rem" onImageClick={(imgs, idx) => openLightbox(imgs, idx, flat.imageLabels)} />
                       <div style={styles.soldCornerBadge}><FiCheckCircle size={12} style={{ marginRight: 4 }} />SOLD</div>
                     </div>
                     <div style={styles.flatBody}>
@@ -1203,12 +1203,18 @@ export default function Dashboard() {
             <button onClick={(e) => { e.stopPropagation(); setLbZoom((z) => Math.min(4, +(z + 0.25).toFixed(2))); }} style={lbStyles.zoomBtn} title="Zoom in">+</button>
             {lbZoom > 1 && <button onClick={(e) => { e.stopPropagation(); setLbZoom(1); }} style={{ ...lbStyles.zoomBtn, fontSize: "0.7rem", padding: "0 10px", width: "auto" }} title="Reset">Reset</button>}
           </div>
-          <img
-            src={lightbox.images[lightbox.idx]}
-            alt="flat"
-            style={{ ...lbStyles.img, transform: `scale(${lbZoom})`, transition: "transform 0.2s ease", cursor: "default" }}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div style={{ position: "relative", display: "inline-flex" }} onClick={(e) => e.stopPropagation()}>
+            <img
+              src={lightbox.images[lightbox.idx]}
+              alt="flat"
+              style={{ ...lbStyles.img, transform: `scale(${lbZoom})`, transition: "transform 0.2s ease", cursor: "default" }}
+            />
+            {lightbox.labels?.[lightbox.idx] && (
+              <div style={{ position: "absolute", bottom: "12px", left: "16px", background: "linear-gradient(135deg,#1abc9c,#16a085)", color: "#fff", padding: "6px 20px", borderRadius: "20px", fontSize: "0.88rem", fontWeight: "700", letterSpacing: "0.4px", zIndex: 10000, pointerEvents: "none" }}>
+                {lightbox.labels[lightbox.idx]}
+              </div>
+            )}
+          </div>
           {lightbox.images.length > 1 && (
             <>
               <button onClick={(e) => { e.stopPropagation(); setLightbox((lb) => ({ ...lb, idx: (lb.idx - 1 + lb.images.length) % lb.images.length })); setLbZoom(1); }} style={{ ...lbStyles.arrow, left: "16px" }}><FiChevronLeft size={22} /></button>

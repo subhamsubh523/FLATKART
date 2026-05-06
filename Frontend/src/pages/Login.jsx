@@ -43,7 +43,7 @@ export default function Login() {
           <h1 style={{ ...styles.brand, color: accent }}><FiHome size={20} style={{ marginRight: 8, verticalAlign: "middle" }} />FLATKART</h1>
           {isOwner ? (
             <>
-              <h2 style={styles.leftTitle}>Welcome back, <span style={{ color: "#f1c40f" }}>Owner!</span></h2>
+              <h2 style={styles.leftTitle}>Welcome Back, <span style={{ color: "#f1c40f" }}>Owner!</span></h2>
               <p style={styles.leftSub}>Log in to manage your listings, track bookings, and chat with tenants.</p>
               <div style={styles.features}>
                 {[

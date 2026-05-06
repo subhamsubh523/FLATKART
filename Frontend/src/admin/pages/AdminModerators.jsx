@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminAPI from "../adminApi";
-import { FiAlertTriangle, FiX, FiUserPlus, FiSave, FiEye, FiEyeOff, FiEdit2, FiTrash2, FiShield, FiUsers, FiHome, FiBookmark, FiAlertCircle } from "react-icons/fi";
+import { FiAlertTriangle, FiX, FiUserPlus, FiSave, FiEye, FiEyeOff, FiEdit2, FiTrash2, FiShield, FiUsers, FiHome, FiBookmark, FiAlertCircle, FiCheckCircle, FiActivity } from "react-icons/fi";
 
 const SECTIONS = [
   { key: "owners",   label: "Owners",   icon: <FiUsers size={13} style={{ marginRight: 5, verticalAlign: "middle" }} />,    ops: ["read", "update", "delete"] },
@@ -27,6 +27,9 @@ export default function AdminModerators() {
   const [saving, setSaving] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [activityMod, setActivityMod] = useState(null);
+  const [activityData, setActivityData] = useState(null);
+  const [loadingActivity, setLoadingActivity] = useState(false);
 
   useEffect(() => {
     AdminAPI.get("/moderators").then(({ data }) => { setMods(data); setLoading(false); }).catch(() => setLoading(false));
@@ -91,6 +94,19 @@ export default function AdminModerators() {
     setDeleteTarget(null);
   };
 
+  const viewActivity = async (mod) => {
+    setActivityMod(mod);
+    setLoadingActivity(true);
+    try {
+      const { data } = await AdminAPI.get(`/moderators/${mod._id}/activity`);
+      setActivityData(data.logs || []);
+    } catch (err) {
+      setActivityData([]);
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
   return (
     <div>
       <div style={s.header}>
@@ -101,7 +117,12 @@ export default function AdminModerators() {
         <button style={s.addBtn} onClick={openAdd}><FiUserPlus size={14} style={{ marginRight: 6, verticalAlign: "middle" }} />Add New Moderator</button>
       </div>
 
-      {loading ? <p style={{ color: "#888", padding: "40px", textAlign: "center" }}>Loading...</p>
+      {loading ? (
+        <div style={{ padding: "40px", textAlign: "center", color: "#888", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+          <div style={{ width: "36px", height: "36px", border: "3px solid #e0e0e0", borderTop: "3px solid #2c3e50", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+          <span>Loading...</span>
+        </div>
+      )
         : mods.length === 0 ? (
           <div style={s.empty}>
             <FiShield size={56} color="#bdc3c7" />
@@ -114,16 +135,20 @@ export default function AdminModerators() {
                 <div style={s.cardTop}>
                   <div style={s.avatar}>{mod.name?.[0]?.toUpperCase()}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
-                      <p style={s.modName}>{mod.name}</p>
-                      <div style={s.cardActions}>
-                        <button style={s.editBtn} onClick={() => openEdit(mod)}><FiEdit2 size={12} style={{ marginRight: 4, verticalAlign: "middle" }} />Edit</button>
-                        <button style={s.delBtn} onClick={() => setDeleteTarget(mod)}><FiTrash2 size={12} style={{ marginRight: 4, verticalAlign: "middle" }} />Delete</button>
-                      </div>
-                    </div>
+                    <p style={s.modName}>{mod.name}</p>
                     <p style={s.modEmail}>{mod.email}</p>
-                    <span style={s.permBadge}>{mod.permissions?.length || 0} permission{mod.permissions?.length !== 1 ? "s" : ""}</span>
-                    {mod.blocked && <span style={s.blockedBadge}><FiAlertCircle size={10} style={{ marginRight: 3, verticalAlign: "middle" }} />Disabled</span>}
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "6px" }}>
+                      <span style={s.permBadge}>{mod.permissions?.length || 0} Permission{mod.permissions?.length !== 1 ? "s" : ""}</span>
+                      {mod.blocked
+                        ? <span style={s.blockedBadge}><FiAlertCircle size={10} style={{ marginRight: 3, verticalAlign: "middle" }} />Disabled</span>
+                        : <span style={s.enabledBadge}><FiCheckCircle size={10} style={{ marginRight: 3, verticalAlign: "middle" }} />Enabled</span>
+                      }
+                    </div>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
+                      <button style={s.activityBtn} onClick={() => viewActivity(mod)}><FiActivity size={12} style={{ marginRight: 4, verticalAlign: "middle" }} />View Activity</button>
+                      <button style={s.editBtn} onClick={() => openEdit(mod)}><FiEdit2 size={12} style={{ marginRight: 4, verticalAlign: "middle" }} />Edit</button>
+                      <button style={s.delBtn} onClick={() => setDeleteTarget(mod)}><FiTrash2 size={12} style={{ marginRight: 4, verticalAlign: "middle" }} />Delete</button>
+                    </div>
                   </div>
                 </div>
 
@@ -151,7 +176,7 @@ export default function AdminModerators() {
                 </div>
 
                 <div style={s.cardFooter}>
-                  <p style={{ ...s.joined, margin: 0 }}>Added {new Date(mod.createdAt).toLocaleDateString()}</p>
+                  <p style={{ ...s.joined, margin: 0 }}>Added On: {new Date(mod.createdAt).toLocaleDateString()}</p>
                   <div style={s.switchWrap} onClick={() => toggleBlock(mod._id)} title={mod.blocked ? "Click to Enable" : "Click to Disable"}>
                     <div style={{ ...s.switchTrack, background: mod.blocked ? "#e74c3c" : "#1abc9c" }}>
                       <div style={{ ...s.switchKnob, transform: mod.blocked ? "translateX(2px)" : "translateX(22px)" }} />
@@ -165,6 +190,41 @@ export default function AdminModerators() {
             ))}
           </div>
         )}
+
+      {activityMod && (
+        <div style={s.delOverlay} onClick={() => { setActivityMod(null); setActivityData(null); }}>
+          <div style={{ ...s.modal, maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+            <div style={s.modalHeader}>
+              <h3 style={s.modalTitle}><FiActivity size={15} style={{ marginRight: 6, verticalAlign: "middle" }} />{activityMod.name} Activity Logs</h3>
+              <button style={s.closeBtn} onClick={() => { setActivityMod(null); setActivityData(null); }}><FiX size={16} /></button>
+            </div>
+            {loadingActivity ? (
+              <p style={{ textAlign: "center", color: "#888", padding: "32px 0" }}>Loading activity...</p>
+            ) : activityData?.length ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "60vh", overflowY: "auto" }}>
+                {activityData.map((log) => (
+                  <div key={log._id} style={s.logItem}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ ...s.logBadge, ...getActionStyle(log.action) }}>{formatAction(log.action)}</span>
+                        <span style={s.logTarget}>{log.targetName || log.targetId}</span>
+                      </div>
+                      <span style={s.logTime}>{new Date(log.timestamp).toLocaleString()}</span>
+                    </div>
+                    {log.details && <p style={s.logDetails}>{log.details}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "40px 0", color: "#aaa" }}>
+                <FiActivity size={40} color="#ddd" style={{ marginBottom: 12 }} />
+                <p style={{ margin: 0, fontSize: "0.9rem" }}>No activity recorded yet.</p>
+                <p style={{ margin: "6px 0 0", fontSize: "0.8rem" }}>Actions performed by this moderator will appear here.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {deleteTarget && (
         <div style={s.delOverlay} onClick={() => setDeleteTarget(null)}>
@@ -335,9 +395,11 @@ const s = {
   modName: { margin: 0, fontWeight: "700", fontSize: "0.95rem", color: "#2c3e50" },
   modEmail: { margin: "2px 0 0", fontSize: "0.8rem", color: "#888", wordBreak: "break-all" },
   cardActions: { display: "flex", gap: "8px", flexShrink: 0, alignItems: "center", marginLeft: "auto" },
+  activityBtn: { padding: "5px 12px", background: "#f0f4ff", color: "#8e44ad", border: "1px solid #d7bde2", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600", display: "inline-flex", alignItems: "center" },
   editBtn: { padding: "5px 12px", background: "#eaf4fb", color: "#2980b9", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" },
   delBtn: { padding: "5px 10px", background: "#fdf0f0", color: "#e74c3c", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem" },
   blockedBadge: { display: "inline-block", background: "#fdf0f0", color: "#e74c3c", border: "1px solid #f5c6cb", borderRadius: "10px", padding: "1px 8px", fontSize: "0.72rem", fontWeight: "600", marginTop: "2px" },
+  enabledBadge: { display: "inline-block", background: "#eafaf1", color: "#27ae60", border: "1px solid #a9dfbf", borderRadius: "10px", padding: "1px 8px", fontSize: "0.72rem", fontWeight: "600", marginTop: "2px" },
   permBadge: { display: "inline-block", background: "#f0f4ff", color: "#2980b9", border: "1px solid #c5d8f5", borderRadius: "10px", padding: "1px 8px", fontSize: "0.72rem", fontWeight: "600", marginTop: "4px", marginRight: "6px" },
   permTitle: { margin: "0 0 8px", fontSize: "0.78rem", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.5px" },
   matrixWrap: { display: "flex", flexDirection: "column", gap: "6px" },
@@ -381,4 +443,50 @@ const s = {
   cancelBtn: { padding: "10px 24px", background: "#f0f2f5", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.92rem", fontWeight: "600", color: "#555" },
   confirmBtn: { padding: "10px 24px", background: "linear-gradient(135deg,#e74c3c,#c0392b)", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.92rem", fontWeight: "700", color: "#fff" },
   saveBtn: { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "12px", background: "linear-gradient(135deg,#e74c3c,#c0392b)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "700", fontSize: "0.97rem", width: "100%" },
+  activitySection: { background: "#f8f9fa", borderRadius: "10px", padding: "14px 16px" },
+  activitySectionTitle: { margin: "0 0 12px", fontSize: "0.78rem", fontWeight: "700", color: "#2c3e50", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center" },
+  activityGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "10px" },
+  logItem: { background: "#f8f9fa", borderRadius: "10px", padding: "12px 14px", borderLeft: "3px solid #e0e0e0" },
+  logBadge: { padding: "2px 8px", borderRadius: "10px", fontSize: "0.72rem", fontWeight: "700", whiteSpace: "nowrap" },
+  logTarget: { fontSize: "0.85rem", fontWeight: "600", color: "#2c3e50" },
+  logTime: { fontSize: "0.72rem", color: "#aaa", whiteSpace: "nowrap", flexShrink: 0 },
+  logDetails: { margin: "6px 0 0", fontSize: "0.78rem", color: "#888" },
 };
+
+const ACTION_STYLES = {
+  blocked_owner:            { background: "#fdf0f0", color: "#e74c3c", borderLeft: "3px solid #e74c3c" },
+  unblocked_owner:          { background: "#eafaf1", color: "#27ae60", borderLeft: "3px solid #27ae60" },
+  restricted_owner_booking: { background: "#fef9e7", color: "#f39c12", borderLeft: "3px solid #f39c12" },
+  allowed_owner_booking:    { background: "#eafaf1", color: "#27ae60", borderLeft: "3px solid #27ae60" },
+  deleted_owner:            { background: "#fdf0f0", color: "#e74c3c", borderLeft: "3px solid #e74c3c" },
+  blocked_tenant:           { background: "#fdf0f0", color: "#e74c3c", borderLeft: "3px solid #e74c3c" },
+  unblocked_tenant:         { background: "#eafaf1", color: "#27ae60", borderLeft: "3px solid #27ae60" },
+  deleted_tenant:           { background: "#fdf0f0", color: "#e74c3c", borderLeft: "3px solid #e74c3c" },
+  showed_flat:              { background: "#eafaf1", color: "#27ae60", borderLeft: "3px solid #27ae60" },
+  hid_flat:                 { background: "#f0f2f5", color: "#888",    borderLeft: "3px solid #bbb" },
+  deleted_flat:             { background: "#fdf0f0", color: "#e74c3c", borderLeft: "3px solid #e74c3c" },
+  deleted_booking:          { background: "#fdf0f0", color: "#e74c3c", borderLeft: "3px solid #e74c3c" },
+};
+
+const ACTION_LABELS = {
+  blocked_owner:            "Blocked Owner",
+  unblocked_owner:          "Unblocked Owner",
+  restricted_owner_booking: "Restricted Booking",
+  allowed_owner_booking:    "Allowed Booking",
+  deleted_owner:            "Deleted Owner",
+  blocked_tenant:           "Blocked Tenant",
+  unblocked_tenant:         "Unblocked Tenant",
+  deleted_tenant:           "Deleted Tenant",
+  showed_flat:              "Showed Flat",
+  hid_flat:                 "Hid Flat",
+  deleted_flat:             "Deleted Flat",
+  deleted_booking:          "Deleted Booking",
+};
+
+function getActionStyle(action) {
+  return ACTION_STYLES[action] || { background: "#f0f4ff", color: "#2980b9", borderLeft: "3px solid #2980b9" };
+}
+
+function formatAction(action) {
+  return ACTION_LABELS[action] || action;
+}

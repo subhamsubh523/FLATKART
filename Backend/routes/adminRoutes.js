@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Admin, { ALL_PERMISSIONS } from "../models/admin.js";
 import Moderator from "../models/moderator.js";
+import ModeratorActivity from "../models/moderatorActivity.js";
 import User from "../models/user.js";
 import Owner from "../models/owner.js";
 import Flat from "../models/flat.js";
@@ -188,6 +189,13 @@ router.delete("/moderators/:id", adminAuth, async (req, res) => {
   res.json({ message: "Moderator deleted" });
 });
 
+router.get("/moderators/:id/activity", adminAuth, async (req, res) => {
+  const mod = await Moderator.findById(req.params.id).select("-password");
+  if (!mod) return res.status(404).json({ message: "Moderator not found" });
+  const logs = await ModeratorActivity.find({ moderatorId: req.params.id }).sort("-timestamp").limit(50);
+  res.json({ moderator: mod, logs });
+});
+
 // ── Owners ────────────────────────────────────────────
 router.get("/owners", adminAuth, async (req, res) => {
   const owners = await Owner.find().select("-password").sort("-createdAt");
@@ -199,6 +207,17 @@ router.patch("/owners/:id/toggle", adminAuth, async (req, res) => {
   if (!owner) return res.status(404).json({ message: "Owner not found" });
   owner.blocked = !owner.blocked;
   await owner.save();
+  if (!req.admin.isSuperAdmin) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: owner.blocked ? "blocked_owner" : "unblocked_owner",
+      targetType: "owner",
+      targetId: owner._id.toString(),
+      targetName: owner.name,
+      details: owner.blocked ? `Blocked owner ${owner.name}` : `Unblocked owner ${owner.name}`,
+    });
+  }
   res.json(owner);
 });
 
@@ -207,13 +226,35 @@ router.patch("/owners/:id/toggle-booking", adminAuth, async (req, res) => {
   if (!owner) return res.status(404).json({ message: "Owner not found" });
   owner.bookingRestricted = !owner.bookingRestricted;
   await owner.save();
-  console.log(`Owner ${owner._id} bookingRestricted set to ${owner.bookingRestricted}`);
+  if (!req.admin.isSuperAdmin) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: owner.bookingRestricted ? "restricted_owner_booking" : "allowed_owner_booking",
+      targetType: "owner",
+      targetId: owner._id.toString(),
+      targetName: owner.name,
+      details: owner.bookingRestricted ? `Restricted booking for owner ${owner.name}` : `Allowed booking for owner ${owner.name}`,
+    });
+  }
   res.json({ _id: owner._id, bookingRestricted: owner.bookingRestricted });
 });
 
 router.delete("/owners/:id", adminAuth, async (req, res) => {
+  const owner = await Owner.findById(req.params.id);
   await Owner.findByIdAndDelete(req.params.id);
   await Flat.deleteMany({ owner_id: req.params.id });
+  if (!req.admin.isSuperAdmin && owner) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: "deleted_owner",
+      targetType: "owner",
+      targetId: req.params.id,
+      targetName: owner.name,
+      details: `Deleted owner ${owner.name} and all their flats`,
+    });
+  }
   res.json({ message: "Owner deleted" });
 });
 
@@ -228,12 +269,35 @@ router.patch("/tenants/:id/toggle", adminAuth, async (req, res) => {
   if (!tenant) return res.status(404).json({ message: "Tenant not found" });
   tenant.blocked = !tenant.blocked;
   await tenant.save();
+  if (!req.admin.isSuperAdmin) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: tenant.blocked ? "blocked_tenant" : "unblocked_tenant",
+      targetType: "tenant",
+      targetId: tenant._id.toString(),
+      targetName: tenant.name,
+      details: tenant.blocked ? `Blocked tenant ${tenant.name}` : `Unblocked tenant ${tenant.name}`,
+    });
+  }
   res.json(tenant);
 });
 
 router.delete("/tenants/:id", adminAuth, async (req, res) => {
+  const tenant = await User.findById(req.params.id);
   await User.findByIdAndDelete(req.params.id);
   await Booking.deleteMany({ tenant_id: req.params.id });
+  if (!req.admin.isSuperAdmin && tenant) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: "deleted_tenant",
+      targetType: "tenant",
+      targetId: req.params.id,
+      targetName: tenant.name,
+      details: `Deleted tenant ${tenant.name} and all their bookings`,
+    });
+  }
   res.json({ message: "Tenant deleted" });
 });
 
@@ -248,12 +312,35 @@ router.patch("/flats/:id/toggle", adminAuth, async (req, res) => {
   if (!flat) return res.status(404).json({ message: "Flat not found" });
   flat.visible = !flat.visible;
   await flat.save();
+  if (!req.admin.isSuperAdmin) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: flat.visible ? "showed_flat" : "hid_flat",
+      targetType: "flat",
+      targetId: flat._id.toString(),
+      targetName: flat.location || flat.type,
+      details: flat.visible ? `Made flat ${flat.location || flat.type} visible` : `Hid flat ${flat.location || flat.type}`,
+    });
+  }
   res.json(flat);
 });
 
 router.delete("/flats/:id", adminAuth, async (req, res) => {
+  const flat = await Flat.findById(req.params.id);
   await Flat.findByIdAndDelete(req.params.id);
   await Booking.deleteMany({ flat_id: req.params.id });
+  if (!req.admin.isSuperAdmin && flat) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: "deleted_flat",
+      targetType: "flat",
+      targetId: req.params.id,
+      targetName: flat.location || flat.type,
+      details: `Deleted flat ${flat.location || flat.type} and all its bookings`,
+    });
+  }
   res.json({ message: "Flat deleted" });
 });
 
@@ -292,7 +379,19 @@ router.patch("/bookings/:id/status", adminAuth, async (req, res) => {
 });
 
 router.delete("/bookings/:id", adminAuth, async (req, res) => {
+  const booking = await Booking.findById(req.params.id).populate("tenant_id", "name").populate("flat_id", "location type");
   await Booking.findByIdAndDelete(req.params.id);
+  if (!req.admin.isSuperAdmin && booking) {
+    await ModeratorActivity.create({
+      moderatorId: req.admin.id,
+      moderatorName: req.admin.name,
+      action: "deleted_booking",
+      targetType: "booking",
+      targetId: req.params.id,
+      targetName: booking.tenant_id?.name || "Unknown",
+      details: `Deleted booking for ${booking.tenant_id?.name || "Unknown"} - ${booking.flat_id?.location || booking.flat_id?.type || "Unknown flat"}`,
+    });
+  }
   res.json({ message: "Booking deleted" });
 });
 

@@ -46,7 +46,12 @@ export default function AdminOverview() {
     AdminAPI.get("/stats").then(({ data }) => setStats(data)).catch(() => {});
   }, []);
 
-  if (!stats) return <div style={s.loading}>Loading stats...</div>;
+  if (!stats) return (
+    <div style={s.loading}>
+      <div style={s.spinner} />
+      <span>Loading...</span>
+    </div>
+  );
 
   return (
     <div>
@@ -90,7 +95,8 @@ export default function AdminOverview() {
 }
 
 const s = {
-  loading: { padding: "40px", color: "#888", textAlign: "center" },
+  loading: { padding: "40px", color: "#888", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" },
+  spinner: { width: "36px", height: "36px", border: "3px solid #e0e0e0", borderTop: "3px solid #2c3e50", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
   title: { margin: "0 0 4px", fontSize: "1.5rem", color: "#2c3e50", fontWeight: "700" },
   sub: { margin: "0 0 20px", color: "#888", fontSize: "0.9rem" },
   permRow: { display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "28px" },

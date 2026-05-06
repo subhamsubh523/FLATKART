@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import ModAPI from "../modApi";
 import AdminTable from "../../admin/components/AdminTable";
-import { FiHome } from "react-icons/fi";
+import { FiHome, FiX, FiChevronLeft, FiChevronRight, FiInfo, FiEye, FiEyeOff, FiTrash2, FiTag, FiMapPin, FiMaximize2, FiAlertTriangle } from "react-icons/fi";
 
 export default function ModFlats({ mod }) {
   const [flats, setFlats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [lightbox, setLightbox] = useState(null);
   const has = (p) => mod?.permissions?.includes(p);
+
+  const openLightbox = (images, idx, labels = []) => setLightbox({ images, idx, labels });
+  const closeLightbox = () => setLightbox(null);
 
   useEffect(() => {
     ModAPI.get("/flats").then(({ data }) => { setFlats(data); setLoading(false); }).catch(() => setLoading(false));
@@ -35,22 +42,32 @@ export default function ModFlats({ mod }) {
   const columns = [
     { key: "image", label: "Image", render: (f) => {
       const src = f.images?.[0] || f.image;
-      return src ? <img src={imgSrc(src)} alt="" style={cs.img} /> : <div style={cs.noImg}><FiHome size={18} color="#aaa" /></div>;
+      return src
+        ? <img src={imgSrc(src)} alt="" style={{ ...cs.img, cursor: "zoom-in" }}
+            onClick={() => openLightbox(
+              (f.images?.length > 0 ? f.images : [f.image]).map(imgSrc),
+              0,
+              f.imageLabels || []
+            )} />
+        : <div style={cs.noImg}><FiHome size={18} color="#aaa" /></div>;
     }},
     { key: "location", label: "Location" },
     { key: "type", label: "Type" },
     { key: "price", label: "Price", render: (f) => `₹${f.price?.toLocaleString()}/mo` },
     { key: "status", label: "Status", render: (f) => (
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <span style={{ ...cs.badge, background: f.visible ? "#eafaf1" : "#f0f2f5", color: f.visible ? "#27ae60" : "#888" }}>{f.visible ? "Visible" : "Hidden"}</span>
-        {f.rented && <span style={{ ...cs.badge, background: "#fef9e7", color: "#f39c12" }}>Rented</span>}
+        <span style={{ ...cs.badge, background: f.visible ? "#eafaf1" : "#f0f2f5", color: f.visible ? "#27ae60" : "#888", border: `1px solid ${f.visible ? "#a9dfbf" : "#ddd"}` }}>
+          {f.visible ? <><FiEye size={11} style={{ marginRight: 4, verticalAlign: "middle" }} />Visible</> : <><FiEyeOff size={11} style={{ marginRight: 4, verticalAlign: "middle" }} />Hidden</>}
+        </span>
+        {f.rented && <span style={{ ...cs.badge, background: "#fef9e7", color: "#f39c12", border: "1px solid #f9e4a0" }}><FiTag size={11} style={{ marginRight: 4, verticalAlign: "middle" }} />Rented</span>}
       </div>
     )},
     { key: "actions", label: "Actions", render: (f) => (
       <div style={cs.actions}>
-        {has("flats:update") && <button style={{ ...cs.btn, background: f.visible ? "#fdf0f0" : "#eafaf1", color: f.visible ? "#e74c3c" : "#27ae60" }} onClick={() => toggleVisibility(f._id)}>{f.visible ? "Hide" : "Show"}</button>}
-        {has("flats:delete") && <button style={{ ...cs.btn, background: "#fdf0f0", color: "#e74c3c" }} onClick={() => remove(f._id)}>Delete</button>}
-        {!has("flats:update") && !has("flats:delete") && <span style={{ color: "#ccc", fontSize: "0.8rem" }}>View only</span>}
+        {has("flats:read") && <button style={{ ...cs.btn, background: "#eaf4fb", color: "#2980b9", border: "1px solid #aed6f1" }} onClick={() => setSelected(f)}><FiInfo size={12} style={{ marginRight: 4 }} />Flat Details</button>}
+        {has("flats:update") && <button style={{ ...cs.btn, background: f.visible ? "#fdf0f0" : "#eafaf1", color: f.visible ? "#e74c3c" : "#27ae60", border: f.visible ? "1px solid #f5c6cb" : "1px solid #a9dfbf" }} onClick={() => toggleVisibility(f._id)}>{f.visible ? <><FiEyeOff size={12} style={{ marginRight: 4 }} />Hide</> : <><FiEye size={12} style={{ marginRight: 4 }} />Show</>}</button>}
+        {has("flats:delete") && <button style={{ ...cs.btn, background: "#fdf0f0", color: "#e74c3c", border: "1px solid #f5c6cb" }} onClick={() => setDeleteTarget(f)}><FiTrash2 size={12} style={{ marginRight: 4 }} />Delete</button>}
+        {!has("flats:read") && !has("flats:update") && !has("flats:delete") && <span style={{ color: "#ccc", fontSize: "0.8rem" }}>No access</span>}
       </div>
     )},
   ];
@@ -65,6 +82,108 @@ export default function ModFlats({ mod }) {
         <input style={cs.search} placeholder="Search by location, type, city..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
       <AdminTable columns={columns} data={filtered} loading={loading} emptyMsg="No flats found." emptyIcon={<FiHome size={56} color="#bdc3c7" style={{ marginBottom: 10 }} />} />
+
+      {selected && !lightbox && (
+        <div style={cs.overlay} onClick={() => setSelected(null)}>
+          <div style={cs.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={cs.modalHeader}>
+              <p style={cs.modalTitle}><FiHome size={16} style={{ marginRight: 8, verticalAlign: "middle" }} />Flat Details</p>
+              <button style={cs.closeBtn} onClick={() => setSelected(null)}><FiX size={18} /></button>
+            </div>
+            {(selected.images?.length > 0 || selected.image) && (
+              <div style={cs.imgRow}>
+                {(selected.images?.length > 0 ? selected.images : [selected.image]).map((src, i) => (
+                  <img key={i} src={imgSrc(src)} alt="" style={{ ...cs.modalImg, cursor: "zoom-in" }}
+                    onClick={(e) => { e.stopPropagation(); openLightbox(
+                      (selected.images?.length > 0 ? selected.images : [selected.image]).map(imgSrc),
+                      i, selected.imageLabels || []
+                    );}}
+                  />
+                ))}
+              </div>
+            )}
+            <div style={cs.sections}>
+              <div style={cs.section}>
+                <p style={cs.sectionTitle}><FiInfo size={13} style={{ marginRight: 6 }} />Basic Info</p>
+                <div style={cs.grid}>
+                  <Detail label="Type" value={selected.type} />
+                  <Detail label="Price" value={`₹${selected.price?.toLocaleString()}/month`} />
+                  <Detail label="Room Size" value={selected.roomWidth && selected.roomBreadth ? `${selected.roomWidth} × ${selected.roomBreadth} ft` : null} />
+                  <Detail label="Visible" value={selected.visible ? "Yes" : "No"} />
+                  <Detail label="Rented" value={selected.rented ? "Yes" : "No"} />
+                  <Detail label="Views" value={selected.views ?? 0} />
+                </div>
+              </div>
+              <div style={cs.section}>
+                <p style={cs.sectionTitle}><FiMapPin size={13} style={{ marginRight: 6 }} />Address</p>
+                <div style={cs.grid}>
+                  <Detail label="House No." value={selected.houseNo} />
+                  <Detail label="Locality" value={selected.locality} />
+                  <Detail label="Landmark" value={selected.landmark} />
+                  <Detail label="City" value={selected.city} />
+                  <Detail label="District" value={selected.district} />
+                  <Detail label="State" value={selected.state} />
+                  <Detail label="Pincode" value={selected.pincode} />
+                  <Detail label="Country" value={selected.country} />
+                </div>
+              </div>
+              {selected.description && (
+                <div style={cs.section}>
+                  <p style={cs.sectionTitle}><FiMaximize2 size={13} style={{ marginRight: 6 }} />Description</p>
+                  <p style={{ margin: 0, fontSize: "0.88rem", color: "#555", lineHeight: 1.6 }}>{selected.description}</p>
+                </div>
+              )}
+              {selected.comments && (
+                <div style={cs.section}>
+                  <p style={cs.sectionTitle}>Comments</p>
+                  <p style={{ margin: 0, fontSize: "0.88rem", color: "#555", lineHeight: 1.6 }}>{selected.comments}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteTarget && (
+        <div style={cs.delOverlay} onClick={() => setDeleteTarget(null)}>
+          <div style={cs.popup} onClick={(e) => e.stopPropagation()}>
+            <button style={cs.popupClose} onClick={() => setDeleteTarget(null)}><FiX size={16} /></button>
+            <div style={cs.iconWrap}><FiAlertTriangle size={28} color="#e74c3c" /></div>
+            <h3 style={cs.popupTitle}>Confirm Delete</h3>
+            <p style={cs.popupMsg}>Delete this flat and all its bookings? This cannot be undone.</p>
+            <div style={cs.popupActions}>
+              <button style={cs.cancelBtn} onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <button style={cs.confirmBtn} onClick={() => { remove(deleteTarget._id); setSelected(null); }}>Yes, Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {lightbox && createPortal(
+        <div onClick={closeLightbox} style={cs.lbOverlay}>
+          <button onClick={closeLightbox} style={cs.lbClose}><FiX size={18} /></button>
+          <div style={{ position: "relative", display: "inline-flex" }} onClick={(e) => e.stopPropagation()}>
+            <img src={lightbox.images[lightbox.idx]} alt="flat" style={cs.lbImg} />
+            {lightbox.labels?.[lightbox.idx] && (
+              <div style={cs.lbLabel}>{lightbox.labels[lightbox.idx]}</div>
+            )}
+          </div>
+          {lightbox.images.length > 1 && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); setLightbox((lb) => ({ ...lb, idx: (lb.idx - 1 + lb.images.length) % lb.images.length })); }} style={{ ...cs.lbArrow, left: "16px" }}><FiChevronLeft size={22} /></button>
+              <button onClick={(e) => { e.stopPropagation(); setLightbox((lb) => ({ ...lb, idx: (lb.idx + 1) % lb.images.length })); }} style={{ ...cs.lbArrow, right: "16px" }}><FiChevronRight size={22} /></button>
+            </>
+          )}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+function Detail({ label, value }) {
+  return (
+    <div>
+      <p style={{ margin: "0 0 2px", fontSize: "0.72rem", fontWeight: "700", color: "#aaa", textTransform: "uppercase", letterSpacing: "0.4px" }}>{label}</p>
+      <p style={{ margin: 0, fontSize: "0.88rem", color: value ? "#2c3e50" : "#ccc" }}>{value || "—"}</p>
     </div>
   );
 }
@@ -76,7 +195,32 @@ const cs = {
   search: { padding: "10px 16px", borderRadius: "8px", border: "1.5px solid #e0e0e0", outline: "none", fontSize: "0.92rem", minWidth: "260px" },
   img: { width: "60px", height: "44px", objectFit: "cover", borderRadius: "6px" },
   noImg: { width: "60px", height: "44px", background: "#f0f2f5", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center" },
-  badge: { padding: "2px 8px", borderRadius: "10px", fontSize: "0.75rem", fontWeight: "600", display: "inline-block" },
+  badge: { padding: "2px 8px", borderRadius: "10px", fontSize: "0.75rem", fontWeight: "600", display: "inline-flex", alignItems: "center", alignSelf: "flex-start" },
   actions: { display: "flex", gap: "8px" },
-  btn: { padding: "5px 14px", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" },
+  btn: { display: "inline-flex", alignItems: "center", padding: "5px 12px", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" },
+  lbOverlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "zoom-out" },
+  lbImg: { maxWidth: "92vw", maxHeight: "90vh", objectFit: "contain", borderRadius: "8px", cursor: "default", display: "block" },
+  lbClose: { position: "fixed", top: "18px", right: "22px", background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", width: "38px", height: "38px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000 },
+  lbArrow: { position: "fixed", top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", width: "46px", height: "46px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000 },
+  lbLabel: { position: "absolute", bottom: "12px", left: "16px", background: "linear-gradient(135deg,#1abc9c,#16a085)", color: "#fff", padding: "6px 20px", borderRadius: "20px", fontSize: "0.88rem", fontWeight: "700", letterSpacing: "0.4px", pointerEvents: "none" },
+  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" },
+  modal: { background: "#fff", borderRadius: "14px", padding: "28px", width: "100%", maxWidth: "680px", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 8px 40px rgba(0,0,0,0.2)" },
+  modalHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" },
+  modalTitle: { margin: 0, fontSize: "1.05rem", fontWeight: "700", color: "#2c3e50" },
+  closeBtn: { background: "none", border: "none", cursor: "pointer", color: "#888", display: "flex" },
+  imgRow: { display: "flex", gap: "10px", overflowX: "auto", marginBottom: "20px", paddingBottom: "4px" },
+  modalImg: { width: "160px", height: "110px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 },
+  sections: { display: "flex", flexDirection: "column", gap: "20px" },
+  section: { background: "#f8f9fa", borderRadius: "10px", padding: "16px" },
+  sectionTitle: { margin: "0 0 12px", fontSize: "0.8rem", fontWeight: "700", color: "#2c3e50", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center" },
+  grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" },
+  delOverlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center" },
+  popup: { background: "#fff", borderRadius: "14px", padding: "32px 28px 24px", width: "100%", maxWidth: "380px", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", textAlign: "center", position: "relative" },
+  popupClose: { position: "absolute", top: "12px", right: "12px", background: "none", border: "none", cursor: "pointer", color: "#aaa", display: "flex" },
+  iconWrap: { width: "56px", height: "56px", borderRadius: "50%", background: "#fdf0f0", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
+  popupTitle: { margin: "0 0 8px", fontSize: "1.1rem", fontWeight: "700", color: "#2c3e50" },
+  popupMsg: { margin: "0 0 24px", fontSize: "0.9rem", color: "#666", lineHeight: 1.5 },
+  popupActions: { display: "flex", gap: "10px", justifyContent: "center" },
+  cancelBtn: { padding: "10px 24px", background: "#f0f2f5", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.92rem", fontWeight: "600", color: "#555" },
+  confirmBtn: { padding: "10px 24px", background: "linear-gradient(135deg,#e74c3c,#c0392b)", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.92rem", fontWeight: "700", color: "#fff" },
 };
