@@ -64,6 +64,16 @@ export default function ForgotPassword() {
     if (value && index < 5) otpRefs.current[index + 1]?.focus();
   };
 
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pastedData.length === 6) {
+      const newOtp = pastedData.split("");
+      setOtp(newOtp);
+      otpRefs.current[5]?.focus();
+    }
+  };
+
   const handleOtpKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
@@ -137,7 +147,7 @@ export default function ForgotPassword() {
                   value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <button style={{ ...styles.btn, opacity: loading ? 0.7 : 1 }} type="submit" disabled={loading}>
-                {loading ? "Sending OTP..." : "Send OTP"}
+                {loading ? "Sending OTP" : "Send OTP"}
               </button>
             </form>
           </>
@@ -160,6 +170,7 @@ export default function ForgotPassword() {
                     value={digit}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    onPaste={handleOtpPaste}
                   />
                 ))}
               </div>
@@ -228,7 +239,11 @@ export default function ForgotPassword() {
         )}
 
         {step < 4 && (
-          <p style={styles.bottomText}><Link to="/login">← Back to Login</Link></p>
+          <p style={styles.bottomText}>
+            <Link to="/login" style={styles.backLink}>
+              <FiArrowLeft size={14} style={{ marginRight: 6, verticalAlign: "middle" }} />Back to Login
+            </Link>
+          </p>
         )}
       </div>
     </div>
@@ -262,4 +277,5 @@ const styles = {
   successBox: { textAlign: "center", padding: "20px 0" },
   successIcon: { fontSize: "3rem" },
   bottomText: { textAlign: "center", marginTop: "20px", fontSize: "0.9rem" },
+  backLink: { display: "inline-flex", alignItems: "center", padding: "8px 18px", background: "#f0f2f5", color: "#2c3e50", border: "1.5px solid #ddd", borderRadius: "8px", textDecoration: "none", fontSize: "0.88rem", fontWeight: "600", transition: "all 0.2s" },
 };

@@ -142,7 +142,7 @@ export default function Login() {
 
             <button style={{ ...styles.btn, opacity: loading ? 0.75 : 1, background: isOwner ? "linear-gradient(135deg, #f1c40f, #f39c12)" : "linear-gradient(135deg, #1abc9c, #16a085)", color: isOwner ? "#1a252f" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }} type="submit" disabled={loading}>
               {loading && <Spinner size={18} color={isOwner ? "#1a252f" : "#fff"} />}
-              {loading ? "Signing In, Please Wait" : "Sign In"}
+              {loading ? "Signing In" : "Sign In"}
             </button>
           </form>
 

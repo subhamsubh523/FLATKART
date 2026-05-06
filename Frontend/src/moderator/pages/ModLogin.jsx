@@ -67,7 +67,7 @@ export default function ModLogin({ onLogin }) {
             </div>
           </div>
           <button style={{ ...s.btn, opacity: loading ? 0.7 : 1 }} type="submit" disabled={loading}>
-            {loading ? "Signing" : "Sign In"}
+            {loading ? "Signing In" : "Sign In"}
           </button>
         </form>
       </div>
@@ -90,7 +90,7 @@ const s = {
   inputWrap: { position: "relative", display: "flex", alignItems: "center" },
   inputIcon: { position: "absolute", left: "12px", color: "#aaa", pointerEvents: "none" },
   input: { width: "100%", padding: "11px 12px 11px 38px", fontSize: "0.97rem", borderRadius: "8px", border: "1.5px solid #e0e0e0", outline: "none", boxSizing: "border-box", background: "#fafafa" },
-  eyeBtn: { position: "absolute", right: "12px", background: "none", border: "none", cursor: "pointer", color: "#888", display: "flex", padding: 0 },
+  eyeBtn: { position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#888", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, width: "20px", height: "20px" },
   emailSuffix: { position: "absolute", right: "12px", fontSize: "0.88rem", color: "#2c3e50", fontWeight: "600", pointerEvents: "none", whiteSpace: "nowrap" },
   btn: { padding: "13px", background: "linear-gradient(135deg,#8e44ad,#6c3483)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "1rem", fontWeight: "700", marginTop: "4px" },
   hint: { textAlign: "center", margin: "20px 0 0", fontSize: "0.82rem", color: "#aaa" },

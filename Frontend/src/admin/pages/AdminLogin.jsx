@@ -84,6 +84,6 @@ const s = {
   inputWrap: { position: "relative", display: "flex", alignItems: "center" },
   inputIcon: { position: "absolute", left: "12px", color: "#aaa", pointerEvents: "none" },
   emailSuffix: { position: "absolute", right: "12px", fontSize: "0.88rem", color: "#2c3e50", fontWeight: "600", pointerEvents: "none", whiteSpace: "nowrap" },
-  eyeBtn: { position: "absolute", right: "12px", background: "none", border: "none", cursor: "pointer", color: "#888", display: "flex", padding: 0 },
+  eyeBtn: { position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#888", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, width: "20px", height: "20px" },
   btn: { padding: "13px", background: "linear-gradient(135deg,#e74c3c,#c0392b)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "1rem", fontWeight: "700", marginTop: "4px" },
 };

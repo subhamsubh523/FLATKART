@@ -345,7 +345,7 @@ const styles = {
   resendRow: { display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "16px" },
   resendText: { fontSize: "0.88rem", color: "#888" },
   resendBtn: { background: "none", border: "1.5px solid currentColor", borderRadius: "6px", fontSize: "0.85rem", fontWeight: "700", padding: "5px 14px", cursor: "pointer", transition: "opacity 0.2s" },
-  backBtn: { display: "block", width: "100%", marginTop: "12px", padding: "10px", background: "transparent", color: "#2c3e50", border: "1.5px solid #2c3e50", borderRadius: "8px", cursor: "pointer", fontSize: "0.92rem", fontWeight: "700", textAlign: "center", letterSpacing: "0.2px" },
+  backBtn: { display: "block", width: "100%", marginTop: "12px", padding: "10px", background: "#f0f2f5", color: "#2c3e50", border: "1.5px solid #ddd", borderRadius: "8px", cursor: "pointer", fontSize: "0.92rem", fontWeight: "700", textAlign: "center", letterSpacing: "0.2px" },
   pwHints: { display: "flex", flexWrap: "wrap", gap: "6px 12px", marginTop: "8px" },
   pwHint: { fontSize: "0.78rem", fontWeight: "500" },
   bottomText: { textAlign: "center", margin: "20px 0 0", fontSize: "0.92rem", color: "#666" },

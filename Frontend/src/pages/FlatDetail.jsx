@@ -192,7 +192,7 @@ export default function FlatDetail() {
         {/* Title & Price below image */}
         <div style={{ margin: "0 24px", padding: "20px 24px", background: "#fff", borderRadius: allImageUrls.length > 1 ? "0" : "0 0 16px 16px", boxShadow: "0 4px 12px rgba(0,0,0,0.06)", borderTop: "1px solid #f0f0f0" }}>
           <h1 style={{ margin: "0 0 8px", fontSize: "1.5rem", color: "#2c3e50", fontWeight: "800", lineHeight: 1.3 }}>{fullAddress || flat.location}</h1>
-          <p style={{ margin: 0, fontSize: "1.6rem", fontWeight: "800", color: "#1abc9c", display: "flex", alignItems: "baseline", gap: "4px" }}>
+          <p style={{ margin: 0, fontSize: "1.6rem", fontWeight: "800", color: "#2c3e50", display: "flex", alignItems: "baseline", gap: "4px" }}>
             ₹{flat.price?.toLocaleString()}<span style={{ fontSize: "0.95rem", fontWeight: "400", color: "#888" }}>/month</span>
           </p>
         </div>

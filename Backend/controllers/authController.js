@@ -3,7 +3,7 @@ import Owner from "../models/owner.js";
 import PendingOTP from "../models/pendingOtp.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendOTPEmail } from "../configure/mailer.js";
+import { sendOTPEmail, sendWelcomeEmail } from "../configure/mailer.js";
 import { uploadAvatarToCloudinary } from "../middleware/upload.js";
 
 // Helper — find user from either collection by email
@@ -57,9 +57,19 @@ export const register = async (req, res) => {
   const hashed = await bcrypt.hash(password, 10);
   if (role === "owner") {
     const owner = await Owner.create({ name, email, password: hashed, role: "owner", phone });
+    try {
+      await sendWelcomeEmail(email, name, "owner");
+    } catch (err) {
+      console.error("Welcome email error:", err.message);
+    }
     res.json(owner);
   } else {
     const user = await User.create({ name, email, password: hashed, role: "tenant", phone });
+    try {
+      await sendWelcomeEmail(email, name, "tenant");
+    } catch (err) {
+      console.error("Welcome email error:", err.message);
+    }
     res.json(user);
   }
 };
