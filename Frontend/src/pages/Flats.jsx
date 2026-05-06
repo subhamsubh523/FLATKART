@@ -109,8 +109,8 @@ export default function Flats() {
           const a = data.address || {};
           const detectedState    = a.state || "";
           const detectedDistrict = a.state_district || a.county || "";
-          const detectedCity     = a.city || a.town || a.village || a.suburb || a.municipality || "";
-          const detectedLocality = a.suburb || a.neighbourhood || a.quarter || "";
+          const detectedCity     = a.city || a.town || a.village || a.municipality || "";
+          const detectedLocality = a.suburb || a.neighbourhood || a.quarter || a.hamlet || a.road || "";
           const detectedPincode  = a.postcode || "";
           // Set state first, then after dropdown options load set the rest
           setLoc({ state: detectedState, district: detectedDistrict, city: detectedCity, locality: detectedLocality, pincode: detectedPincode });
