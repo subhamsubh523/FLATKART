@@ -632,6 +632,11 @@ a[style*="background"]:active {
   }
 }
 
+/* Forgot password link hover underline */
+.forgot-link:hover {
+  text-decoration: underline !important;
+}
+
 /* Overview stat card hover */
 .overview-card {
   box-shadow: 0 2px 10px rgba(0,0,0,0.07) !important;

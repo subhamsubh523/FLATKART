@@ -7,7 +7,44 @@ import { FiUser, FiLock, FiKey, FiEye, FiEyeOff, FiImage, FiEdit2, FiUpload, FiS
 
 export default function AccountSettings() {
   const { user, updateUser } = useAuth();
-  const [activeTab, setActiveTab] = useState("avatar");
+  const [name, setName] = useState(user?.name || "");
+  const [newPhone, setNewPhone] = useState("");
+  const [currentPhone, setCurrentPhone] = useState("");
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    API.get("/auth/me").then(({ data }) => setCurrentPhone(data.phone || "")).catch(() => {});
+  }, []);
+
+  const handleUpdateAll = async () => {
+    setLoading(true);
+    try {
+      if (name.trim() && name !== user?.name) {
+        const formData = new FormData();
+        formData.append("name", name);
+        const { data } = await API.put("/auth/update-profile", formData);
+        updateUser({ name: data.name });
+      }
+      if (newPhone.trim()) {
+        if (!/^[0-9]{10}$/.test(newPhone.trim())) { toast.error("Enter a valid 10-digit phone number"); setLoading(false); return; }
+        await API.put("/auth/update-phone", { phone: "+91" + newPhone.trim() });
+        updateUser({ phone: "+91" + newPhone.trim() });
+        setCurrentPhone("+91" + newPhone.trim());
+        setNewPhone("");
+      }
+      if (passwordForm.newPassword) {
+        if (passwordForm.newPassword === passwordForm.currentPassword) { toast.error("New password cannot be the same as current."); setLoading(false); return; }
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) { toast.error("Passwords do not match"); setLoading(false); return; }
+        const rules = [(p) => p.length >= 8 && p.length <= 15, (p) => /[A-Z]/.test(p), (p) => /[a-z]/.test(p), (p) => /[^A-Za-z0-9]/.test(p)];
+        if (!rules.every((r) => r(passwordForm.newPassword))) { toast.error("Password must be 8–15 chars with uppercase, lowercase, and special character."); setLoading(false); return; }
+        await API.put("/auth/change-password", { currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword });
+        setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      }
+      toast.success("Changes updated successfully!");
+    } catch (e) { toast.error(e.response?.data?.message || "Failed to update changes"); }
+    finally { setLoading(false); }
+  };
 
   const avatarSrc = user?.avatar
     ? user.avatar.startsWith("http") ? user.avatar : `http://localhost:5000/uploads/${user.avatar}`
@@ -29,25 +66,18 @@ export default function AccountSettings() {
           </div>
         </div>
 
-        <div style={styles.tabs}>
-          {[
-            { key: "avatar",   label: "Profile Picture",  icon: <FiImage size={14} /> },
-            { key: "name",     label: "Edit Name",         icon: <FiEdit2 size={14} /> },
-            { key: "phone",    label: "Phone Number",      icon: <FiPhone size={14} /> },
-            { key: "password", label: "Change Password",   icon: <FiLock size={14} /> },
-          ].map((t) => (
-            <button key={t.key} style={{ ...styles.tab, ...(activeTab === t.key ? styles.tabActive : {}) }}
-              onClick={() => setActiveTab(t.key)}>
-              <span style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center" }}>{t.icon} {t.label}</span>
-            </button>
-          ))}
-        </div>
-
         <div style={styles.body}>
-          {activeTab === "avatar"   && <AvatarSection user={user} updateUser={updateUser} />}
-          {activeTab === "name"     && <NameSection user={user} updateUser={updateUser} />}
-          {activeTab === "phone"    && <PhoneSection user={user} updateUser={updateUser} />}
-          {activeTab === "password" && <PasswordSection />}
+          <AvatarSection user={user} updateUser={updateUser} />
+          <div style={styles.divider} />
+          <NameSection name={name} setName={setName} />
+          <div style={styles.divider} />
+          <PhoneSection currentPhone={currentPhone} newPhone={newPhone} setNewPhone={setNewPhone} />
+          <div style={styles.divider} />
+          <PasswordSection form={passwordForm} setForm={setPasswordForm} />
+          <div style={styles.divider} />
+          <button style={{ ...styles.primaryBtn, opacity: loading ? 0.7 : 1, background: "#1abc9c" }} onClick={handleUpdateAll} disabled={loading}>
+            {loading ? "Updating..." : "Update Changes"}
+          </button>
         </div>
       </div>
     </div>
@@ -149,27 +179,9 @@ function AvatarSection({ user, updateUser }) {
 }
 
 /* ── Name Section ── */
-function NameSection({ user, updateUser }) {
-  const [name, setName] = useState(user?.name || "");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSave = async () => {
-    if (!name.trim()) { setError("Name cannot be empty"); return; }
-    setLoading(true); setError("");
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      const { data } = await API.put("/auth/update-profile", formData);
-      updateUser({ name: data.name });
-      toast.success("Name updated successfully!");
-    } catch { setError("Failed to update name"); }
-    finally { setLoading(false); }
-  };
-
+function NameSection({ name, setName }) {
   return (
     <div style={styles.section}>
-      {error && <div style={styles.errorBox}>{error}</div>}
       <div style={styles.group}>
         <label style={styles.label}>Full Name</label>
         <div style={styles.inputWrapper}>
@@ -177,41 +189,14 @@ function NameSection({ user, updateUser }) {
           <input style={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter new name" />
         </div>
       </div>
-      <button style={{ ...styles.primaryBtn, opacity: loading ? 0.7 : 1 }} onClick={handleSave} disabled={loading}>
-        {loading ? "Saving..." : "Save Name"}
-      </button>
     </div>
   );
 }
 
 /* ── Phone Section ── */
-function PhoneSection({ user, updateUser }) {
-  const [currentPhone, setCurrentPhone] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    API.get("/auth/me").then(({ data }) => setCurrentPhone(data.phone || "")).catch(() => {});
-  }, []);
-
-  const handleSave = async () => {
-    if (!newPhone.trim()) { setError("New phone number cannot be empty"); return; }
-    if (!/^[0-9]{10}$/.test(newPhone.trim())) { setError("Enter a valid 10-digit phone number"); return; }
-    setLoading(true); setError("");
-    try {
-      const { data } = await API.put("/auth/update-phone", { phone: "+91" + newPhone.trim() });
-      updateUser({ phone: "+91" + newPhone.trim() });
-      setCurrentPhone("+91" + newPhone.trim());
-      toast.success("Phone number updated!");
-      setNewPhone("");
-    } catch { setError("Failed to update phone number"); }
-    finally { setLoading(false); }
-  };
-
+function PhoneSection({ currentPhone, newPhone, setNewPhone }) {
   return (
     <div style={styles.section}>
-      {error && <div style={styles.errorBox}>{error}</div>}
       <div style={styles.group}>
         <label style={styles.label}>Current Phone Number</label>
         <div style={styles.inputWrapper}>
@@ -225,19 +210,13 @@ function PhoneSection({ user, updateUser }) {
           <input style={{ ...styles.input, paddingLeft: "12px" }} value={newPhone ? "+91 " + newPhone : ""} onChange={(e) => setNewPhone(e.target.value.replace(/^\+91\s?/, "").replace(/\D/g, ""))} placeholder="Enter 10-digit number" maxLength={14} />
         </div>
       </div>
-      <button style={{ ...styles.primaryBtn, opacity: loading ? 0.7 : 1 }} onClick={handleSave} disabled={loading}>
-        {loading ? "Saving..." : "Save Phone Number"}
-      </button>
     </div>
   );
 }
 
 /* ── Password Section ── */
-function PasswordSection() {
-  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+function PasswordSection({ form, setForm }) {
   const [show, setShow] = useState({ current: false, new: false, confirm: false });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const passwordRules = [
     { label: "8–15 characters", test: (p) => p.length >= 8 && p.length <= 15 },
@@ -246,28 +225,11 @@ function PasswordSection() {
     { label: "One special character", test: (p) => /[^A-Za-z0-9]/.test(p) },
   ];
 
-  const validatePassword = (p) => passwordRules.every((r) => r.test(p));
-
   const isSameAsCurrent = form.newPassword.length > 0 && form.currentPassword.length > 0 && form.newPassword === form.currentPassword;
   const isConfirmMismatch = form.confirmPassword.length > 0 && form.newPassword !== form.confirmPassword;
 
-  const handleSave = async () => {
-    setError("");
-    if (isSameAsCurrent) { setError("New password cannot be the same as your current password."); return; }
-    if (form.newPassword !== form.confirmPassword) { setError("Passwords do not match"); return; }
-    if (!validatePassword(form.newPassword)) { setError("Password must be 8–15 characters and include uppercase, lowercase, and a special character."); return; }
-    setLoading(true);
-    try {
-      await API.put("/auth/change-password", { currentPassword: form.currentPassword, newPassword: form.newPassword });
-      toast.success("Password changed successfully!");
-      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (e) { setError(e.response?.data?.message || "Failed to change password"); }
-    finally { setLoading(false); }
-  };
-
   return (
     <div style={styles.section}>
-      {error && <div style={styles.errorBox}>{error}</div>}
 
       <div style={styles.group}>
         <label style={styles.label}>Current Password</label>
@@ -324,9 +286,6 @@ function PasswordSection() {
         )}
       </div>
 
-      <button style={{ ...styles.primaryBtn, opacity: loading ? 0.7 : 1 }} onClick={handleSave} disabled={loading}>
-        {loading ? "Updating" : "Update Password"}
-      </button>
     </div>
   );
 }
@@ -356,10 +315,8 @@ const styles = {
   userName: { margin: "0 0 2px", color: "#fff", fontSize: "1.1rem", fontWeight: "700" },
   userEmail: { margin: "0 0 6px", color: "#bdc3c7", fontSize: "0.85rem" },
   userRole: { background: "rgba(26,188,156,0.2)", color: "#1abc9c", padding: "2px 10px", borderRadius: "10px", fontSize: "0.75rem", fontWeight: "600" },
-  tabs: { display: "flex", borderBottom: "1px solid #f0f0f0" },
-  tab: { flex: 1, padding: "14px 8px", background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: "600", color: "#888", borderBottom: "2px solid transparent" },
-  tabActive: { color: "#2c3e50", borderBottom: "2px solid #1abc9c" },
   body: { padding: "28px 32px" },
+  divider: { height: "1px", background: "#e0e0e0", margin: "24px 0" },
   section: { display: "flex", flexDirection: "column", gap: "16px", alignItems: "stretch" },
   group: { display: "flex", flexDirection: "column", gap: "7px" },
   label: { fontSize: "0.85rem", fontWeight: "600", color: "#444" },

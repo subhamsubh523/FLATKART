@@ -122,7 +122,7 @@ export default function Login() {
             <div style={styles.group}>
               <div style={styles.labelRow}>
                 <label style={styles.label}>Password</label>
-                <Link to="/forgot-password" style={styles.forgotLink}>Forgot password?</Link>
+                <Link to="/forgot-password" style={styles.forgotLink} className="forgot-link">Forgot password?</Link>
               </div>
               <div style={styles.inputWrapper}>
                 <span style={styles.inputIcon}><FiLock size={15} /></span>
@@ -180,7 +180,7 @@ const styles = {
   group: { display: "flex", flexDirection: "column", gap: "7px" },
   labelRow: { display: "flex", justifyContent: "space-between", alignItems: "center" },
   label: { fontSize: "0.85rem", fontWeight: "600", color: "#444" },
-  forgotLink: { fontSize: "0.82rem", color: "#1abc9c", textDecoration: "none" },
+  forgotLink: { fontSize: "0.82rem", color: "#1abc9c", textDecoration: "none", cursor: "pointer" },
   inputWrapper: { position: "relative", display: "flex", alignItems: "center" },
   inputIcon: { position: "absolute", left: "12px", fontSize: "0.95rem", pointerEvents: "none", zIndex: 1 },
   input: { width: "100%", padding: "11px 42px 11px 38px", fontSize: "0.97rem", borderRadius: "8px", border: "1.5px solid #e0e0e0", outline: "none", boxSizing: "border-box", background: "#fafafa" },
