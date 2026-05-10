@@ -1,4 +1,4 @@
-export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "📧 Email Verification", bodyText = "Use the OTP below to verify your email:") => {
+export const sendOTPEmail = async (to, otp, subject = "Reset Your Password", heading = "Email Verification", bodyText = "Use the OTP below to verify your email:") => {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
