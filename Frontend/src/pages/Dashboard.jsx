@@ -366,7 +366,7 @@ export default function Dashboard() {
       }
     } catch (err) {
       if (err.response?.status === 403) {
-        toast.error("You are restricted to perform this action. Please contact support.");
+        toast.error("You are restricted to perform this action. Please contact Admin Support.");
       }
     }
   };
