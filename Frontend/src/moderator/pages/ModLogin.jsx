@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle, FiTool } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle, FiTool, FiUser } from "react-icons/fi";
 import ModAPI from "../modApi";
 
 export default function ModLogin({ onLogin }) {
@@ -48,7 +48,7 @@ export default function ModLogin({ onLogin }) {
           <div style={s.group}>
             <label style={s.label}>Moderator Address</label>
             <div style={s.inputWrap}>
-              <FiMail size={15} style={s.inputIcon} />
+              <FiUser size={15} style={s.inputIcon} />
               <input style={{ ...s.input, paddingRight: "120px" }} type="text" placeholder="Moderator ID"
                 value={form.emailPrefix} onChange={(e) => setForm({ ...form, emailPrefix: e.target.value })} required />
               <span style={s.emailSuffix}>@flatkart.com</span>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle, FiShield } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle, FiShield, FiUser } from "react-icons/fi";
 import AdminAPI from "../adminApi";
 
 export default function AdminLogin({ onLogin }) {
@@ -42,7 +42,7 @@ export default function AdminLogin({ onLogin }) {
           <div style={s.group}>
             <label style={s.label}>Admin Address</label>
             <div style={s.inputWrap}>
-              <FiMail size={15} style={s.inputIcon} />
+              <FiUser size={15} style={s.inputIcon} />
               <input style={{ ...s.input, paddingRight: "120px" }} type="text" placeholder="Admin ID"
                 value={form.emailPrefix} onChange={(e) => setForm({ ...form, emailPrefix: e.target.value })} required />
               <span style={s.emailSuffix}>@flatkart.com</span>
